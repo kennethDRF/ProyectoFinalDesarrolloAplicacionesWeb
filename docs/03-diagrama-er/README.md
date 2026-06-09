@@ -8,7 +8,6 @@ Modelo de la base de datos del sistema de gestión de barberías.
 |----------|------------|
 | diagrama-er.png | Diagrama visual del modelo entidad-relación |
 | modelo-relacional.md | Descripción textual de tablas y relaciones |
-| diagrama-er.mwb | Archivo nativo de MySQL Workbench (opcional) |
 
 ---
 
