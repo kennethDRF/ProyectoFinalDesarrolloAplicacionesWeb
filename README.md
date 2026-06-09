@@ -1,7 +1,7 @@
 # 💈 Barbex — Sistema de Gestión de Barbería
 
 > **Proyecto Final — Curso SC-403 Desarrollo de Aplicaciones Web y Patrones**
-> Universidad Fidélitas — Cuatrimestre 2026
+> Universidad Fidélitas — Segundo Cuatrimestre 2026
 
 Aplicación web transaccional para la administración de una Barbería: gestión de citas, control de servicios y control de pagos.
 
