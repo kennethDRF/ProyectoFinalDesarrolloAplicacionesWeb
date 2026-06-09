@@ -1,4 +1,4 @@
-# 🐾 Barbex — Sistema de Gestión de Barbería
+# 💈 Barbex — Sistema de Gestión de Barbería
 
 > **Proyecto Final — Curso SC-403 Desarrollo de Aplicaciones Web y Patrones**
 > Universidad Fidélitas — Cuatrimestre 2026
