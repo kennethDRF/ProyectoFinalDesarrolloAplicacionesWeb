@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout/base :: base('Citas afectadas', ~{::main})}">
+<head>
+    <title>Citas afectadas</title>
+</head>
+<body>
+    <main>
+        <h1 class="mb-4">Citas afectadas por cambio de horario</h1>
+
+        <div class="alert alert-warning">
+            El cambio de horario afecta las siguientes citas. Debes reagendarlas o cancelarlas.
+        </div>
+
+        <div class="alert alert-success" th:if="${ok}" th:text="${ok}"></div>
+        <div class="alert alert-danger" th:if="${error}" th:text="${error}"></div>
+
+        <div class="card shadow">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Cliente</th>
+                                <th>Fecha</th>
+                                <th>Hora actual</th>
+                                <th>Reagendar</th>
+                                <th>Cancelar</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="c : ${citasAfectadas}">
+                                <td th:text="${c.cliente.nombreCompleto}"></td>
+                                <td th:text="${c.fecha}"></td>
+                                <td th:text="${c.horaInicio + ' - ' + c.horaFin}"></td>
+                                <td>
+                                    <form th:action="@{/barbero/horarios/afectadas/reagendar}" method="post" class="row g-2">
+                                        <input type="hidden" name="citaId" th:value="${c.id}">
+                                        <div class="col-auto">
+                                            <input type="date" name="nuevaFecha" class="form-control form-control-sm" required>
+                                        </div>
+                                        <div class="col-auto">
+                                            <input type="text" name="nuevaHoraInicio" class="form-control form-control-sm input-hora-afectada"
+                                                   placeholder="HH:mm" maxlength="5" required
+                                                   title="Formato 24 horas, ej: 08:00 o 18:30">
+                                        </div>
+                                        <div class="col-auto">
+                                            <button type="submit" class="btn btn-sm btn-primary">Reagendar</button>
+                                        </div>
+                                    </form>
+                                </td>
+                                <td>
+                                    <form th:action="@{/barbero/horarios/afectadas/cancelar}" method="post">
+                                        <input type="hidden" name="citaId" th:value="${c.id}">
+                                        <button type="submit" class="btn btn-sm btn-danger">Cancelar</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <a th:href="@{/barbero/horarios}" class="btn btn-outline-secondary">Volver</a>
+            </div>
+        </div>
+
+        <script>
+            function esHoraValida(texto) {
+                return /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/.test(texto);
+            }
+
+            function normalizarHora(input) {
+                let valor = input.value.trim();
+                if (valor === '') return;
+                if (/^\d{3,4}$/.test(valor)) {
+                    if (valor.length === 3) valor = '0' + valor;
+                    input.value = valor.substring(0, 2) + ':' + valor.substring(2, 4);
+                }
+                if (!esHoraValida(input.value)) {
+                    input.classList.add('is-invalid');
+                } else {
+                    input.classList.remove('is-invalid');
+                }
+            }
+
+            document.querySelectorAll('.input-hora-afectada').forEach(function(input) {
+                input.addEventListener('blur', function() {
+                    normalizarHora(this);
+                });
+            });
+
+            document.querySelectorAll('form[action="/barbero/horarios/afectadas/reagendar"]').forEach(function(form) {
+                form.addEventListener('submit', function(e) {
+                    const input = this.querySelector('.input-hora-afectada');
+                    if (input && !esHoraValida(input.value)) {
+                        input.classList.add('is-invalid');
+                        input.focus();
+                        e.preventDefault();
+                        alert('Ingrese una hora valida en formato 24 horas (ej: 08:00, 18:30).');
+                    }
+                });
+            });
+        </script>
+    </main>
+</body>
+</html>

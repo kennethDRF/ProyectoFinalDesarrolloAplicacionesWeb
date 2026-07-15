@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout/base :: base('Gestion de citas', ~{::main})}">
+<head>
+    <title>Citas</title>
+</head>
+<body>
+    <main>
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1>Mis citas</h1>
+            <a th:href="@{/cliente/citas/nueva}" class="btn btn-primary">Nueva cita</a>
+        </div>
+
+        <div class="card shadow">
+            <div class="card-body">
+                <h5 class="card-title mb-3">Historial de citas</h5>
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Fecha</th>
+                                <th>Hora</th>
+                                <th>Barbero</th>
+                                <th>Servicios</th>
+                                <th>Monto total</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="c : ${citas}" th:classappend="${c.vencida} ? 'cita-vencida'">
+                                <td th:text="${c.fecha}"></td>
+                                <td th:text="${c.horaInicio + ' - ' + c.horaFin}"></td>
+                                <td th:text="${c.barbero.nombreCompleto}"></td>
+                                <td>
+                                    <span th:each="cs, iter : ${c.citaServicios}" th:text="${cs.servicio.nombre} + (${!iter.last} ? ', ' : '')"></span>
+                                </td>
+                                <td th:text="${'$' + c.montoTotal}"></td>
+                                <td>
+                                    <span class="badge" th:classappend="'estado-' + ${c.estado}" th:text="${c.estado}"></span>
+                                    <span class="badge bg-warning" th:if="${c.vencida}">Vencida</span>
+                                </td>
+                                <td>
+                                    <div class="btn-group btn-group-sm" th:if="${c.estado.name() != 'CANCELADA' && c.estado.name() != 'RECHAZADA' && c.estado.name() != 'COMPLETADA'}">
+                                        <a th:href="@{/cliente/citas/{id}/editar(id=${c.id})}" class="btn btn-outline-primary" title="Editar"><i class="bi bi-pencil"></i></a>
+                                        <form th:action="@{/cliente/citas/{id}/solicitar-cancelacion(id=${c.id})}" method="post" class="d-inline">
+                                            <button type="submit" class="btn btn-outline-danger" title="Cancelar" onclick="return confirm('Esta seguro?')"><i class="bi bi-x-circle"></i></button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="card shadow mt-4" th:if="${!solicitudes.isEmpty()}">
+            <div class="card-body">
+                <h5 class="card-title mb-3">Mis solicitudes</h5>
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>Tipo</th>
+                                <th>Fecha original</th>
+                                <th>Nueva fecha</th>
+                                <th>Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="s : ${solicitudes}">
+                                <td th:text="${s.tipo}"></td>
+                                <td th:text="${s.cita.fecha}"></td>
+                                <td th:text="${s.nuevaFecha + ' ' + s.nuevaHoraInicio}"></td>
+                                <td th:text="${s.estadoSolicitud}"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+</body>
+</html>

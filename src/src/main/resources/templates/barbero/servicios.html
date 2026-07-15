@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout/base :: base('Servicios', ~{::main})}">
+<head>
+    <title>Servicios</title>
+</head>
+<body>
+    <main>
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1>Servicios</h1>
+            <a th:href="@{/barbero/servicios/nuevo}" class="btn btn-primary">Nuevo</a>
+        </div>
+
+        <div class="card shadow">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Descripcion</th>
+                                <th>Precio</th>
+                                <th>Duracion</th>
+                                <th>Adelanto</th>
+                                <th>Activo</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="s : ${servicios}">
+                                <td th:text="${s.nombre}"></td>
+                                <td th:text="${s.descripcion}"></td>
+                                <td th:text="${'$' + s.precio}"></td>
+                                <td th:text="${s.duracionMinutos + ' min'}"></td>
+                                <td th:text="${s.montoAdelanto != null ? '$' + s.montoAdelanto : '-'}"></td>
+                                <td>
+                                    <span class="badge" th:classappend="${s.activo} ? 'bg-success' : 'bg-secondary'" th:text="${s.activo} ? 'Si' : 'No'"></span>
+                                </td>
+                                <td>
+                                    <form th:action="@{/barbero/servicios/{id}/eliminar(id=${s.id})}" method="post" class="d-inline">
+                                        <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Esta seguro de eliminar este servicio definitivamente?')">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+</body>
+</html>

@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout/base :: base('Nueva cita', ~{::main})}">
+<head>
+    <title>Nueva cita</title>
+</head>
+<body>
+    <main>
+        <h1 class="mb-4">Nueva cita</h1>
+
+        <div class="alert alert-warning" th:if="${barberos == null or barberos.isEmpty()}">
+            <i class="bi bi-exclamation-triangle"></i>
+            No hay barberos disponibles en esta barberia. No se pueden agendar citas por el momento.
+        </div>
+
+        <div class="alert alert-warning" th:if="${servicios == null or servicios.isEmpty()}">
+            <i class="bi bi-exclamation-triangle"></i>
+            No hay servicios disponibles en esta barberia. No se pueden agendar citas por el momento.
+        </div>
+
+        <div class="card shadow" th:if="${barberos != null and !barberos.isEmpty() and servicios != null and !servicios.isEmpty()}">
+            <div class="card-body">
+                <form th:action="@{/cliente/citas/guardar}" method="post">
+                    <input type="hidden" name="clienteId" th:value="${clienteId}">
+                    <input type="hidden" name="barberiaId" th:value="${barberiaId}">
+
+                    <div class="mb-3">
+                        <label class="form-label">Barbero</label>
+                        <select name="barberoId" id="barberoId" class="form-select" required>
+                            <option value="">Seleccione un barbero</option>
+                            <option th:each="b : ${barberos}" th:value="${b.id}" th:text="${b.nombreCompleto}"></option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <button type="button" id="btnVerHorario" class="btn btn-outline-info">
+                            <i class="bi bi-clock"></i> Ver horario
+                        </button>
+                    </div>
+
+                    <div class="collapse mb-3" id="panelHorario">
+                        <div class="card card-body">
+                            <h6>Horario del barbero</h6>
+                            <div id="contenidoHorario">
+                                <p class="text-muted">Seleccione un barbero y presione "Ver horario".</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Servicios</label>
+                        <div class="row">
+                            <div class="col-md-6 mb-2" th:each="s : ${servicios}">
+                                <div class="form-check">
+                                    <input class="form-check-input input-servicio" type="checkbox" name="servicios" th:value="${s.id}" th:id="${'serv' + s.id}">
+                                    <label class="form-check-label" th:for="${'serv' + s.id}"
+                                           th:text="${s.nombre + ' - $' + s.precio + ' (' + s.duracionMinutos + ' min)'}">
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <small class="text-muted">Seleccione al menos un servicio. El sistema validara que el barbero lo ofrezca.</small>
+                    </div>
+
+                    <div class="card mb-3" id="totalesServicios" style="display: none;">
+                        <div class="card-body">
+                            <h6 class="card-title">Resumen</h6>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <strong>Total servicios:</strong> <span id="totalServicios">$0</span>
+                                </div>
+                                <div class="col-md-6">
+                                    <strong>Total adelanto:</strong> <span id="totalAdelanto">$0</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Fecha</label>
+                        <input type="date" name="fecha" class="form-control" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Hora de inicio</label>
+                        <input type="text" name="horaInicio" id="horaInicio" class="form-control"
+                               placeholder="HH:mm" maxlength="5" required
+                               title="Formato 24 horas, ej: 08:00 o 18:30">
+                        <small class="text-muted">Ingrese la hora en formato 24 horas (ej: 08:00, 18:30).</small>
+                    </div>
+
+                    <div class="mb-3" id="seccionAdelanto" style="display: none;">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="adelantoPagado" id="adelantoPagado" value="true">
+                            <label class="form-check-label" for="adelantoPagado">
+                                He pagado el adelanto
+                            </label>
+                        </div>
+                        <div class="mt-2">
+                            <label class="form-label">Numero de comprobante</label>
+                            <input type="text" name="comprobanteAdelanto" class="form-control">
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary">Guardar</button>
+                        <a th:href="@{/cliente/dashboard}" class="btn btn-outline-secondary">Cancelar</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="toast align-items-center text-bg-warning border-0" role="alert" aria-live="assertive" aria-atomic="true" id="toastBarbero">
+            <div class="d-flex">
+                <div class="toast-body">Seleccione un barbero primero.</div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        </div>
+
+        <script type="application/json" id="horariosTodosJson" th:utext="${horariosTodosJson}"></script>
+        <script type="application/json" id="excepcionesTodosJson" th:utext="${excepcionesTodosJson}"></script>
+        <script type="application/json" id="serviciosJson" th:utext="${serviciosJson}"></script>
+        <script>
+            const horariosTodos = JSON.parse(document.getElementById('horariosTodosJson').textContent);
+            const excepcionesTodos = JSON.parse(document.getElementById('excepcionesTodosJson').textContent);
+            const serviciosData = JSON.parse(document.getElementById('serviciosJson').textContent);
+
+            function formatearDinero(valor) {
+                return '$' + parseFloat(valor).toLocaleString('es-CR', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+            }
+
+            function actualizarTotales() {
+                let total = 0;
+                let adelanto = 0;
+                document.querySelectorAll('.input-servicio:checked').forEach(function(checkbox) {
+                    const servicio = serviciosData.find(s => s.id == checkbox.value);
+                    if (servicio) {
+                        total += parseFloat(servicio.precio);
+                        adelanto += parseFloat(servicio.montoAdelanto);
+                    }
+                });
+
+                document.getElementById('totalServicios').textContent = formatearDinero(total);
+                document.getElementById('totalAdelanto').textContent = formatearDinero(adelanto);
+
+                const card = document.getElementById('totalesServicios');
+                if (total > 0) {
+                    card.style.display = 'block';
+                } else {
+                    card.style.display = 'none';
+                }
+
+                const seccionAdelanto = document.getElementById('seccionAdelanto');
+                if (adelanto > 0) {
+                    seccionAdelanto.style.display = 'block';
+                } else {
+                    seccionAdelanto.style.display = 'none';
+                    document.getElementById('adelantoPagado').checked = false;
+                    document.querySelector('input[name="comprobanteAdelanto"]').value = '';
+                }
+            }
+
+            document.querySelectorAll('.input-servicio').forEach(function(checkbox) {
+                checkbox.addEventListener('change', actualizarTotales);
+            });
+
+            const nombresDias = {
+                'MONDAY': 'Lunes',
+                'TUESDAY': 'Martes',
+                'WEDNESDAY': 'Miercoles',
+                'THURSDAY': 'Jueves',
+                'FRIDAY': 'Viernes',
+                'SATURDAY': 'Sabado',
+                'SUNDAY': 'Domingo'
+            };
+
+            const ordenDias = ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY'];
+
+            function obtenerHorariosPorBarbero(barberoId) {
+                return horariosTodos.filter(h => h.barberoId == barberoId);
+            }
+
+            function obtenerExcepcionesPorBarbero(barberoId) {
+                return excepcionesTodos.filter(e => e.barberoId == barberoId);
+            }
+
+            function construirTablaSemanal(horarios) {
+                let html = '<table class="table table-sm"><thead><tr><th>Dia</th><th>Horario</th></tr></thead><tbody>';
+
+                ordenDias.forEach(diaIngles => {
+                    const h = horarios.find(x => x.dia === diaIngles);
+                    const nombre = nombresDias[diaIngles];
+                    const horario = h && !h.libre ? h.inicio + ' - ' + h.fin : 'Libre';
+                    html += '<tr><td>' + nombre + '</td><td>' + horario + '</td></tr>';
+                });
+
+                html += '</tbody></table>';
+                return html;
+            }
+
+            function construirTablaExcepciones(excepciones) {
+                if (excepciones.length === 0) {
+                    return '<p class="text-muted">No hay excepciones programadas.</p>';
+                }
+
+                let html = '<h6 class="mt-3">Excepciones</h6>';
+                html += '<table class="table table-sm"><thead><tr><th>Fecha</th><th>Tipo</th><th>Horario</th><th>Motivo</th></tr></thead><tbody>';
+
+                excepciones.forEach(e => {
+                    const horario = e.tipo === 'NO_TRABAJA' ? 'No trabaja' : e.inicio + ' - ' + e.fin;
+                    html += '<tr><td>' + e.fecha + '</td><td>' + e.tipo + '</td><td>' + horario + '</td><td>' + e.motivo + '</td></tr>';
+                });
+
+                html += '</tbody></table>';
+                return html;
+            }
+
+            document.getElementById('btnVerHorario').addEventListener('click', function() {
+                const barberoId = document.getElementById('barberoId').value;
+
+                if (!barberoId) {
+                    const toast = new bootstrap.Toast(document.getElementById('toastBarbero'));
+                    toast.show();
+                    return;
+                }
+
+                const horarios = obtenerHorariosPorBarbero(barberoId);
+                const excepciones = obtenerExcepcionesPorBarbero(barberoId);
+
+                let html = '<h6>Horario semanal</h6>';
+                html += construirTablaSemanal(horarios);
+                html += construirTablaExcepciones(excepciones);
+
+                document.getElementById('contenidoHorario').innerHTML = html;
+
+                const panel = new bootstrap.Collapse(document.getElementById('panelHorario'), {
+                    toggle: true
+                });
+            });
+
+            function esHoraValida(texto) {
+                return /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/.test(texto);
+            }
+
+            function normalizarHora(input) {
+                let valor = input.value.trim();
+                if (valor === '') return;
+                if (/^\d{3,4}$/.test(valor)) {
+                    if (valor.length === 3) valor = '0' + valor;
+                    input.value = valor.substring(0, 2) + ':' + valor.substring(2, 4);
+                }
+                if (!esHoraValida(input.value)) {
+                    input.classList.add('is-invalid');
+                } else {
+                    input.classList.remove('is-invalid');
+                }
+            }
+
+            const inputHora = document.getElementById('horaInicio');
+            if (inputHora) {
+                inputHora.addEventListener('blur', function() {
+                    normalizarHora(this);
+                });
+            }
+
+            document.querySelector('form[action="/cliente/citas/guardar"]').addEventListener('submit', function(e) {
+                if (!esHoraValida(inputHora.value)) {
+                    inputHora.classList.add('is-invalid');
+                    inputHora.focus();
+                    e.preventDefault();
+                    alert('Ingrese una hora valida en formato 24 horas (ej: 08:00, 18:30).');
+                }
+            });
+        </script>
+    </main>
+</body>
+</html>

@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout/base :: base('Solicitudes de cambio', ~{::main})}">
+<head>
+    <title>Solicitudes</title>
+</head>
+<body>
+    <main>
+        <h1 class="mb-4">Solicitudes de cambio</h1>
+
+        <div class="card shadow">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Tipo</th>
+                                <th>Cliente</th>
+                                <th>Fecha original</th>
+                                <th>Nueva fecha/hora</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="s : ${solicitudes}">
+                                <td th:text="${s.tipo}"></td>
+                                <td th:text="${s.cita.cliente.nombreCompleto}"></td>
+                                <td th:text="${s.cita.fecha + ' ' + s.cita.horaInicio}"></td>
+                                <td th:text="${s.nuevaFecha != null ? s.nuevaFecha + ' ' + s.nuevaHoraInicio : '-'}"></td>
+                                <td>
+                                    <div class="btn-group btn-group-sm">
+                                        <form th:action="@{/barbero/solicitudes/{id}/aprobar(id=${s.id})}" method="post" class="d-inline">
+                                            <button type="submit" class="btn btn-success">Aprobar</button>
+                                        </form>
+                                        <form th:action="@{/barbero/solicitudes/{id}/rechazar(id=${s.id})}" method="post" class="d-inline">
+                                            <input type="hidden" name="motivo" value="Solicitud rechazada por el barbero">
+                                            <button type="submit" class="btn btn-danger">Rechazar</button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+</body>
+</html>

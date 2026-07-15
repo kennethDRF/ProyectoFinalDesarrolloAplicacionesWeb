@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout/base :: base('Editar cita', ~{::main})}">
+<head>
+    <title>Editar cita</title>
+</head>
+<body>
+    <main>
+        <h1 class="mb-4">Editar cita</h1>
+
+        <div class="alert alert-info">
+            Solo puedes cambiar la fecha y hora de la cita. El barbero debe aprobar el cambio.
+        </div>
+
+        <div class="card shadow">
+            <div class="card-body">
+                <form th:action="@{/cliente/citas/{id}/solicitar-edicion(id=${cita.id})}" method="post">
+                    <div class="mb-3">
+                        <label class="form-label">Nueva fecha</label>
+                        <input type="date" name="nuevaFecha" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Nueva hora</label>
+                        <input type="text" name="nuevaHoraInicio" id="nuevaHoraInicio" class="form-control"
+                               placeholder="HH:mm" maxlength="5" required
+                               title="Formato 24 horas, ej: 08:00 o 18:30">
+                        <small class="text-muted">Ingrese la hora en formato 24 horas (ej: 08:00, 18:30).</small>
+                    </div>
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary">Solicitar cambio</button>
+                        <a th:href="@{/cliente/dashboard}" class="btn btn-outline-secondary">Cancelar</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <script>
+            function esHoraValida(texto) {
+                return /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/.test(texto);
+            }
+
+            function normalizarHora(input) {
+                let valor = input.value.trim();
+                if (valor === '') return;
+                if (/^\d{3,4}$/.test(valor)) {
+                    if (valor.length === 3) valor = '0' + valor;
+                    input.value = valor.substring(0, 2) + ':' + valor.substring(2, 4);
+                }
+                if (!esHoraValida(input.value)) {
+                    input.classList.add('is-invalid');
+                } else {
+                    input.classList.remove('is-invalid');
+                }
+            }
+
+            const inputHora = document.getElementById('nuevaHoraInicio');
+            if (inputHora) {
+                inputHora.addEventListener('blur', function() {
+                    normalizarHora(this);
+                });
+            }
+
+            document.querySelector('form').addEventListener('submit', function(e) {
+                if (!esHoraValida(inputHora.value)) {
+                    inputHora.classList.add('is-invalid');
+                    inputHora.focus();
+                    e.preventDefault();
+                    alert('Ingrese una hora valida en formato 24 horas (ej: 08:00, 18:30).');
+                }
+            });
+        </script>
+    </main>
+</body>
+</html>

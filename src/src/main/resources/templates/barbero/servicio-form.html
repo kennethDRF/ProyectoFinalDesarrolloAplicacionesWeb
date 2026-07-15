@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout/base :: base('Nuevo servicio', ~{::main})}">
+<head>
+    <title>Nuevo servicio</title>
+</head>
+<body>
+    <main>
+        <h1 class="mb-4">Nuevo servicio</h1>
+
+        <div class="card shadow">
+            <div class="card-body">
+                <form th:action="@{/barbero/servicios/guardar}" th:object="${servicio}" method="post">
+                    <input type="hidden" th:field="*{barberia.id}">
+
+                    <div class="mb-3">
+                        <label class="form-label">Nombre</label>
+                        <input type="text" th:field="*{nombre}" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Descripcion</label>
+                        <textarea th:field="*{descripcion}" class="form-control" rows="3"></textarea>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Precio</label>
+                            <input type="number" step="0.01" th:field="*{precio}" class="form-control" required>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Duracion (min)</label>
+                            <input type="number" th:field="*{duracionMinutos}" class="form-control" required>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Adelanto</label>
+                            <input type="number" step="0.01" th:field="*{montoAdelanto}" class="form-control">
+                        </div>
+                    </div>
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary">Guardar</button>
+                        <a th:href="@{/barbero/servicios}" class="btn btn-outline-secondary">Cancelar</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+</body>
+</html>

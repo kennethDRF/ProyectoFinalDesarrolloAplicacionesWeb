@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout/base :: base('Horario laboral', ~{::main})}">
+<head>
+    <title>Horarios</title>
+</head>
+<body>
+    <main>
+        <h1 class="mb-4">Horario laboral</h1>
+
+        <div class="row">
+            <div class="col-md-8">
+                <div class="card shadow mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title mb-3">Horario semanal</h5>
+                        <p class="text-muted small">Marque el checkbox "Libre" para los dias que no trabaje.</p>
+
+                        <form id="formHorarios" th:action="@{/barbero/horarios/guardar}" method="post">
+                            <div class="table-responsive">
+                                <table class="table table-sm align-middle">
+                                    <thead>
+                                        <tr>
+                                            <th>Dia</th>
+                                            <th class="text-center">Libre</th>
+                                            <th>Hora inicio</th>
+                                            <th>Hora fin</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr th:each="h, iter : ${horarios}">
+                                            <td th:switch="${h.diaSemana.name()}">
+                                                <span th:case="'MONDAY'">Lunes</span>
+                                                <span th:case="'TUESDAY'">Martes</span>
+                                                <span th:case="'WEDNESDAY'">Miercoles</span>
+                                                <span th:case="'THURSDAY'">Jueves</span>
+                                                <span th:case="'FRIDAY'">Viernes</span>
+                                                <span th:case="'SATURDAY'">Sabado</span>
+                                                <span th:case="'SUNDAY'">Domingo</span>
+                                            </td>
+                                            <td class="text-center">
+                                                <input type="hidden" th:name="'diaSemana'" th:value="${h.diaSemana}">
+                                                <input type="hidden" th:name="'libre'" th:value="${h.libre}" class="libre-hidden">
+                                                <input type="checkbox" class="form-check-input checkbox-libre"
+                                                       th:checked="${h.libre}"
+                                                       th:data-index="${iter.index}" title="Dia libre">
+                                            </td>
+                                            <td>
+                                                <input type="text" th:name="'horaInicio'" class="form-control form-control-sm input-hora-inicio"
+                                                       th:value="${h.horaInicio}" th:readonly="${h.libre}"
+                                                       placeholder="HH:mm" maxlength="5"
+                                                       title="Formato 24 horas, ej: 08:00 o 18:30">
+                                            </td>
+                                            <td>
+                                                <input type="text" th:name="'horaFin'" class="form-control form-control-sm input-hora-fin"
+                                                       th:value="${h.horaFin}" th:readonly="${h.libre}"
+                                                       placeholder="HH:mm" maxlength="5"
+                                                       title="Formato 24 horas, ej: 08:00 o 18:30">
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary">Guardar horario semanal</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card shadow">
+                    <div class="card-body">
+                        <h5 class="card-title mb-3">Excepciones</h5>
+                        <form id="formExcepciones" th:action="@{/barbero/excepciones/guardar}" method="post">
+                            <div class="mb-2">
+                                <label class="form-label">Fecha</label>
+                                <input type="date" name="fecha" class="form-control" required>
+                            </div>
+                            <div class="mb-2">
+                                <label class="form-label">Tipo</label>
+                                <select name="tipo" class="form-select" required>
+                                    <option value="TRABAJA">Trabaja</option>
+                                    <option value="NO_TRABAJA">No trabaja</option>
+                                </select>
+                            </div>
+                            <div class="row g-2 mb-2">
+                                <div class="col">
+                                    <label class="form-label">Inicio</label>
+                                    <input type="text" name="horaInicio" class="form-control input-exc-hora"
+                                           placeholder="HH:mm" maxlength="5"
+                                           title="Formato 24 horas, ej: 08:00 o 18:30">
+                                </div>
+                                <div class="col">
+                                    <label class="form-label">Fin</label>
+                                    <input type="text" name="horaFin" class="form-control input-exc-hora"
+                                           placeholder="HH:mm" maxlength="5"
+                                           title="Formato 24 horas, ej: 08:00 o 18:30">
+                                </div>
+                            </div>
+                            <div class="mb-2">
+                                <label class="form-label">Motivo</label>
+                                <input type="text" name="motivo" class="form-control" placeholder="Motivo">
+                            </div>
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary"><i class="bi bi-plus"></i> Agregar excepcion</button>
+                            </div>
+                        </form>
+
+                        <div class="table-responsive mt-3">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Fecha</th>
+                                        <th>Tipo</th>
+                                        <th>Horario</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="e : ${excepciones}">
+                                        <td th:text="${e.fecha}"></td>
+                                        <td th:text="${e.tipo}"></td>
+                                        <td th:text="${e.tipo.name() == 'NO_TRABAJA'} ? 'No trabaja' : ${e.horaInicio + ' - ' + e.horaFin}"></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            function esHoraValida(texto) {
+                return /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/.test(texto);
+            }
+
+            function normalizarHora(input) {
+                let valor = input.value.trim();
+                if (valor === '') return;
+
+                // Si escriben solo numeros como 800 o 0830, convertir a HH:mm
+                if (/^\d{3,4}$/.test(valor)) {
+                    if (valor.length === 3) {
+                        valor = '0' + valor;
+                    }
+                    valor = valor.substring(0, 2) + ':' + valor.substring(2, 4);
+                    input.value = valor;
+                }
+
+                if (!esHoraValida(input.value)) {
+                    input.classList.add('is-invalid');
+                } else {
+                    input.classList.remove('is-invalid');
+                }
+            }
+
+            function actualizarRequired(input, requerido) {
+                if (requerido) {
+                    input.setAttribute('required', 'required');
+                } else {
+                    input.removeAttribute('required');
+                }
+            }
+
+            document.querySelectorAll('.checkbox-libre').forEach(function(checkbox) {
+                checkbox.addEventListener('change', function() {
+                    const fila = this.closest('tr');
+                    const hiddenLibre = fila.querySelector('.libre-hidden');
+                    const inputInicio = fila.querySelector('.input-hora-inicio');
+                    const inputFin = fila.querySelector('.input-hora-fin');
+
+                    hiddenLibre.value = this.checked;
+                    inputInicio.readOnly = this.checked;
+                    inputFin.readOnly = this.checked;
+
+                    if (this.checked) {
+                        inputInicio.dataset.valorAnterior = inputInicio.value;
+                        inputFin.dataset.valorAnterior = inputFin.value;
+                        inputInicio.value = '';
+                        inputFin.value = '';
+                        actualizarRequired(inputInicio, false);
+                        actualizarRequired(inputFin, false);
+                    } else {
+                        inputInicio.value = inputInicio.dataset.valorAnterior || '';
+                        inputFin.value = inputFin.dataset.valorAnterior || '';
+                        inputInicio.focus();
+                        actualizarRequired(inputInicio, true);
+                        actualizarRequired(inputFin, true);
+                    }
+                });
+            });
+
+            document.querySelectorAll('.input-hora-inicio, .input-hora-fin').forEach(function(input) {
+                input.addEventListener('blur', function() {
+                    normalizarHora(this);
+                });
+            });
+
+            // Validar formulario de horario semanal antes de enviar
+            document.getElementById('formHorarios').addEventListener('submit', function(e) {
+                let valido = true;
+                this.querySelectorAll('tr').forEach(function(fila) {
+                    const checkbox = fila.querySelector('.checkbox-libre');
+                    const inputInicio = fila.querySelector('.input-hora-inicio');
+                    const inputFin = fila.querySelector('.input-hora-fin');
+                    if (checkbox && !checkbox.checked) {
+                        if (inputInicio && !esHoraValida(inputInicio.value)) {
+                            inputInicio.classList.add('is-invalid');
+                            valido = false;
+                        }
+                        if (inputFin && !esHoraValida(inputFin.value)) {
+                            inputFin.classList.add('is-invalid');
+                            valido = false;
+                        }
+                        if (inputInicio && inputFin && valido) {
+                            const partesInicio = inputInicio.value.split(':');
+                            const partesFin = inputFin.value.split(':');
+                            const minutosInicio = parseInt(partesInicio[0]) * 60 + parseInt(partesInicio[1]);
+                            const minutosFin = parseInt(partesFin[0]) * 60 + parseInt(partesFin[1]);
+                            if (minutosFin <= minutosInicio) {
+                                alert('La hora de fin debe ser mayor que la hora de inicio.');
+                                valido = false;
+                            }
+                        }
+                    }
+                });
+                if (!valido) {
+                    e.preventDefault();
+                }
+            });
+
+            // Logica de excepciones
+            const selectTipo = document.querySelector('select[name="tipo"]');
+            const excInputs = document.querySelectorAll('.input-exc-hora');
+
+            function actualizarExcepciones() {
+                const noTrabaja = selectTipo.value === 'NO_TRABAJA';
+                excInputs.forEach(function(input) {
+                    input.disabled = noTrabaja;
+                    if (noTrabaja) {
+                        input.value = '';
+                        input.removeAttribute('required');
+                    } else {
+                        input.setAttribute('required', 'required');
+                    }
+                });
+            }
+
+            if (selectTipo) {
+                selectTipo.addEventListener('change', actualizarExcepciones);
+                actualizarExcepciones();
+            }
+
+            excInputs.forEach(function(input) {
+                input.addEventListener('blur', function() {
+                    normalizarHora(this);
+                });
+            });
+
+            document.getElementById('formExcepciones').addEventListener('submit', function(e) {
+                if (selectTipo.value === 'TRABAJA') {
+                    let valido = true;
+                    excInputs.forEach(function(input) {
+                        if (!esHoraValida(input.value)) {
+                            input.classList.add('is-invalid');
+                            valido = false;
+                        }
+                    });
+                    if (!valido) {
+                        e.preventDefault();
+                    }
+                }
+            });
+        </script>
+    </main>
+</body>
+</html>
