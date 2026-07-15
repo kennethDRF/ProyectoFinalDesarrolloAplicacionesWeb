@@ -1,10 +1,12 @@
-# 🗃️ Scripts de Base de Datos
+# Scripts de Base de Datos
 
-## 📄 Archivos
+Base de datos: **`barbex_db`**
+
+## Archivos
 
 | Archivo | Para qué |
 |---|---|
-| `schema.sql` | Crear todas las tablas (DDL) |
+| `schema.sql` | Crear la base de datos y todas las tablas |
 | `seed-data.sql` | Insertar datos de prueba |
 
 ## Cómo aplicar
@@ -18,9 +20,10 @@
 
 ```bash
 mysql -u root -p < schema.sql
-mysql -u root -p vetcaredb < seed-data.sql
+mysql -u root -p barbex_db < seed-data.sql
 ```
 
-## Hibernate vs `schema.sql`
+## Notas
 
-Hibernate también crea las tablas a partir de las `@Entity` con `ddl-auto=update`. El `schema.sql` es la **referencia oficial** del esquema y es lo que se aplica en producción.
+- `schema.sql` crea la base de datos `barbex_db` si no existe.
+- `seed-data.sql` llena las tablas.

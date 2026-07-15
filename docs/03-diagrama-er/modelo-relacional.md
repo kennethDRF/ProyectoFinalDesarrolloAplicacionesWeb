@@ -1,169 +1,151 @@
-# Modelo Relacional — BarberShop System
+# Modelo Relacional — Barbex
 
 Descripción textual de cada tabla con sus columnas, tipos y relaciones.
+Base de datos: `barbex_db`
 
 ---
 
-## Tabla: `roles`
+## Tabla: `barberias`
 
-| Columna | Tipo        | Nulo | PK | FK | Descripción     |
-| ------- | ----------- | ---- | -- | -- | --------------- |
-| role_id | INT         | NO   | ✅  |    | Llave primaria  |
-| name    | VARCHAR(50) | NO   |    |    | OWNER, EMPLOYEE |
-
----
-
-## Tabla: `barbershops`
-
-| Columna       | Tipo         | Nulo | PK | FK | Descripción            |
-| ------------- | ------------ | ---- | -- | -- | ---------------------- |
-| barbershop_id | INT          | NO   | ✅  |    | Llave primaria         |
-| name          | VARCHAR(150) | NO   |    |    | Nombre de la barbería  |
-| phone         | VARCHAR(30)  | SÍ   |    |    | Teléfono               |
-| email         | VARCHAR(150) | SÍ   |    |    | Correo electrónico     |
-| address       | VARCHAR(255) | SÍ   |    |    | Dirección              |
-| is_active     | BOOLEAN      | NO   |    |    | default true           |
-| created_at    | TIMESTAMP    | NO   |    |    | Fecha de creación      |
-| updated_at    | TIMESTAMP    | NO   |    |    | Fecha de actualización |
+| Columna | Tipo | Nulo | PK | FK | Descripción |
+|---|---|---|---|---|---|
+| id | BIGINT | NO | ✅ | | Llave primaria |
+| nombre | VARCHAR(100) | NO | | | Nombre de la barbería |
+| direccion | VARCHAR(255) | SÍ | | | Dirección |
+| telefono | VARCHAR(20) | SÍ | | | Teléfono |
+| codigo_acceso | VARCHAR(20) | SÍ | | | Código único de acceso (UNIQUE) |
+| fecha_registro | DATETIME(6) | NO | | | Fecha de creación |
 
 ---
 
-## Tabla: `users`
+## Tabla: `usuarios`
 
-| Columna       | Tipo         | Nulo | PK | FK                           | Descripción                 |
-| ------------- | ------------ | ---- | -- | ---------------------------- | --------------------------- |
-| user_id       | INT          | NO   | ✅  |                              | Llave primaria              |
-| barbershop_id | INT          | NO   |    | ✅ barbershops(barbershop_id) | Barbería a la que pertenece |
-| role_id       | INT          | NO   |    | ✅ roles(role_id)             | Rol asignado                |
-| full_name     | VARCHAR(150) | NO   |    |                              | Nombre completo             |
-| email         | VARCHAR(150) | NO   |    |                              | Correo de acceso            |
-| phone         | VARCHAR(30)  | SÍ   |    |                              | Teléfono                    |
-| password_hash | VARCHAR(255) | NO   |    |                              | Contraseña encriptada       |
-| is_active     | BOOLEAN      | NO   |    |                              | default true                |
-| created_at    | TIMESTAMP    | NO   |    |                              | Fecha de creación           |
-| updated_at    | TIMESTAMP    | NO   |    |                              | Fecha de actualización      |
+| Columna | Tipo | Nulo | PK | FK | Descripción |
+|---|---|---|---|---|---|
+| id | BIGINT | NO | ✅ | | Llave primaria |
+| barberia_id | BIGINT | NO | | ✅ barberias(id) | Barbería a la que pertenece |
+| nombre_completo | VARCHAR(100) | NO | | | Nombre completo |
+| email | VARCHAR(100) | NO | | | Correo de acceso (UNIQUE) |
+| password | VARCHAR(255) | NO | | | Contraseña |
+| telefono | VARCHAR(20) | SÍ | | | Teléfono |
+| rol | ENUM('BARBERO','CLIENTE') | NO | | | Rol del usuario |
+| activo | BIT | NO | | | Indica si está activo |
 
 ---
 
-## Tabla: `services`
+## Tabla: `servicios`
 
-| Columna          | Tipo          | Nulo | PK | FK                           | Descripción            |
-| ---------------- | ------------- | ---- | -- | ---------------------------- | ---------------------- |
-| service_id       | INT           | NO   | ✅  |                              | Llave primaria         |
-| barbershop_id    | INT           | NO   |    | ✅ barbershops(barbershop_id) | Barbería propietaria   |
-| name             | VARCHAR(100)  | NO   |    |                              | Nombre del servicio    |
-| description      | TEXT          | SÍ   |    |                              | Descripción            |
-| price            | DECIMAL(10,2) | NO   |    |                              | Precio                 |
-| duration_minutes | INT           | NO   |    |                              | Duración del servicio  |
-| is_active        | BOOLEAN       | NO   |    |                              | default true           |
-| created_at       | TIMESTAMP     | NO   |    |                              | Fecha de creación      |
-| updated_at       | TIMESTAMP     | NO   |    |                              | Fecha de actualización |
-
----
-
-## Tabla: `customers`
-
-| Columna       | Tipo         | Nulo | PK | FK                           | Descripción          |
-| ------------- | ------------ | ---- | -- | ---------------------------- | -------------------- |
-| customer_id   | INT          | NO   | ✅  |                              | Llave primaria       |
-| barbershop_id | INT          | NO   |    | ✅ barbershops(barbershop_id) | Barbería relacionada |
-| full_name     | VARCHAR(150) | NO   |    |                              | Nombre completo      |
-| phone         | VARCHAR(30)  | NO   |    |                              | Teléfono             |
-| email         | VARCHAR(150) | SÍ   |    |                              | Correo electrónico   |
-| created_at    | TIMESTAMP    | NO   |    |                              | Fecha de registro    |
+| Columna | Tipo | Nulo | PK | FK | Descripción |
+|---|---|---|---|---|---|
+| id | BIGINT | NO | ✅ | | Llave primaria |
+| barberia_id | BIGINT | NO | | ✅ barberias(id) | Barbería propietaria |
+| nombre | VARCHAR(100) | NO | | | Nombre del servicio |
+| descripcion | VARCHAR(500) | SÍ | | | Descripción |
+| precio | DECIMAL(10,2) | NO | | | Precio |
+| duracion_minutos | INT | NO | | | Duración en minutos |
+| monto_adelanto | DECIMAL(10,2) | SÍ | | | Monto de adelanto requerido |
+| activo | BIT | NO | | | Indica si está activo |
 
 ---
 
-## Tabla: `appointments`
+## Tabla: `barbero_servicios`
 
-| Columna            | Tipo      | Nulo | PK | FK                           | Descripción                                       |
-| ------------------ | --------- | ---- | -- | ---------------------------- | ------------------------------------------------- |
-| appointment_id     | INT       | NO   | ✅  |                              | Llave primaria                                    |
-| barbershop_id      | INT       | NO   |    | ✅ barbershops(barbershop_id) | Barbería                                          |
-| customer_id        | INT       | NO   |    | ✅ customers(customer_id)     | Cliente                                           |
-| service_id         | INT       | NO   |    | ✅ services(service_id)       | Servicio solicitado                               |
-| barber_user_id     | INT       | NO   |    | ✅ users(user_id)             | Barbero asignado                                  |
-| created_by_user_id | INT       | SÍ   |    | ✅ users(user_id)             | Usuario creador                                   |
-| appointment_date   | DATE      | NO   |    |                              | Fecha de cita                                     |
-| start_time         | TIME      | NO   |    |                              | Hora inicio                                       |
-| end_time           | TIME      | NO   |    |                              | Hora final                                        |
-| status             | ENUM      | NO   |    |                              | PENDING, ACCEPTED, REJECTED, CANCELLED, COMPLETED |
-| notes              | TEXT      | SÍ   |    |                              | Observaciones                                     |
-| created_at         | TIMESTAMP | NO   |    |                              | Fecha creación                                    |
-| updated_at         | TIMESTAMP | NO   |    |                              | Fecha actualización                               |
+Tabla asociativa para relación M:N entre barberos y servicios.
+
+| Columna | Tipo | Nulo | PK | FK | Descripción |
+|---|---|---|---|---|---|
+| id | BIGINT | NO | ✅ | | Llave primaria |
+| barbero_id | BIGINT | NO | | ✅ usuarios(id) | Barbero |
+| servicio_id | BIGINT | NO | | ✅ servicios(id) | Servicio que ofrece |
 
 ---
 
-## Tabla: `payments`
+## Tabla: `citas`
 
-| Columna             | Tipo          | Nulo | PK | FK                             | Descripción                        |
-| ------------------- | ------------- | ---- | -- | ------------------------------ | ---------------------------------- |
-| payment_id          | INT           | NO   | ✅  |                                | Llave primaria                     |
-| appointment_id      | INT           | NO   |    | ✅ appointments(appointment_id) | Cita relacionada                   |
-| amount              | DECIMAL(10,2) | NO   |    |                                | Monto pagado                       |
-| payment_method      | ENUM          | NO   |    |                                | SINPE_MOVIL                        |
-| receipt_image_url   | VARCHAR(255)  | NO   |    |                                | Ruta de la imagen                  |
-| status              | ENUM          | NO   |    |                                | PENDING_REVIEW, APPROVED, REJECTED |
-| reviewed_by_user_id | INT           | SÍ   |    | ✅ users(user_id)               | Usuario revisor                    |
-| reviewed_at         | DATETIME      | SÍ   |    |                                | Fecha de revisión                  |
-| created_at          | TIMESTAMP     | NO   |    |                                | Fecha de creación                  |
-
----
-
-## Tabla: `work_schedules`
-
-| Columna       | Tipo    | Nulo | PK | FK                           | Descripción    |
-| ------------- | ------- | ---- | -- | ---------------------------- | -------------- |
-| schedule_id   | INT     | NO   | ✅  |                              | Llave primaria |
-| barbershop_id | INT     | NO   |    | ✅ barbershops(barbershop_id) | Barbería       |
-| user_id       | INT     | NO   |    | ✅ users(user_id)             | Barbero        |
-| day_of_week   | ENUM    | NO   |    |                              | Día laboral    |
-| start_time    | TIME    | NO   |    |                              | Hora inicio    |
-| end_time      | TIME    | NO   |    |                              | Hora final     |
-| is_active     | BOOLEAN | NO   |    |                              | default true   |
+| Columna | Tipo | Nulo | PK | FK | Descripción |
+|---|---|---|---|---|---|
+| id | BIGINT | NO | ✅ | | Llave primaria |
+| barberia_id | BIGINT | NO | | ✅ barberias(id) | Barbería |
+| barbero_id | BIGINT | NO | | ✅ usuarios(id) | Barbero asignado |
+| cliente_id | BIGINT | NO | | ✅ usuarios(id) | Cliente |
+| fecha | DATE | NO | | | Fecha de la cita |
+| hora_inicio | TIME(6) | NO | | | Hora inicio |
+| hora_fin | TIME(6) | NO | | | Hora fin |
+| monto_total | DECIMAL(10,2) | NO | | | Monto total |
+| monto_adelanto | DECIMAL(10,2) | SÍ | | | Adelanto requerido |
+| adelanto_pagado | BIT | NO | | | Indica si el adelanto fue pagado |
+| comprobante_adelanto | VARCHAR(100) | SÍ | | | Ruta del comprobante |
+| estado | ENUM('PENDIENTE','CONFIRMADA','COMPLETADA','CANCELADA','RECHAZADA') | NO | | | Estado de la cita |
+| motivo_cancelacion | VARCHAR(500) | SÍ | | | Motivo de cancelación |
+| fecha_creacion | DATETIME(6) | NO | | | Fecha de creación |
 
 ---
 
-## Tabla: `blocked_times`
+## Tabla: `cita_servicios`
 
-| Columna         | Tipo         | Nulo | PK | FK                           | Descripción        |
-| --------------- | ------------ | ---- | -- | ---------------------------- | ------------------ |
-| blocked_time_id | INT          | NO   | ✅  |                              | Llave primaria     |
-| barbershop_id   | INT          | NO   |    | ✅ barbershops(barbershop_id) | Barbería           |
-| user_id         | INT          | NO   |    | ✅ users(user_id)             | Barbero            |
-| block_date      | DATE         | NO   |    |                              | Fecha bloqueada    |
-| start_time      | TIME         | NO   |    |                              | Hora inicio        |
-| end_time        | TIME         | NO   |    |                              | Hora final         |
-| reason          | VARCHAR(255) | SÍ   |    |                              | Motivo del bloqueo |
-| created_at      | TIMESTAMP    | NO   |    |                              | Fecha de creación  |
+Tabla asociativa para relación M:N entre citas y servicios.
+
+| Columna | Tipo | Nulo | PK | FK | Descripción |
+|---|---|---|---|---|---|
+| id | BIGINT | NO | ✅ | | Llave primaria |
+| cita_id | BIGINT | NO | | ✅ citas(id) | Cita |
+| servicio_id | BIGINT | NO | | ✅ servicios(id) | Servicio solicitado |
 
 ---
 
-## Tabla: `appointment_history`
+## Tabla: `horarios_generales`
 
-| Columna            | Tipo        | Nulo | PK | FK                             | Descripción                   |
-| ------------------ | ----------- | ---- | -- | ------------------------------ | ----------------------------- |
-| history_id         | INT         | NO   | ✅  |                                | Llave primaria                |
-| appointment_id     | INT         | NO   |    | ✅ appointments(appointment_id) | Cita modificada               |
-| changed_by_user_id | INT         | SÍ   |    | ✅ users(user_id)               | Usuario que realizó el cambio |
-| old_status         | VARCHAR(50) | SÍ   |    |                                | Estado anterior               |
-| new_status         | VARCHAR(50) | SÍ   |    |                                | Estado nuevo                  |
-| comment            | TEXT        | SÍ   |    |                                | Comentario                    |
-| created_at         | TIMESTAMP   | NO   |    |                                | Fecha del cambio              |
+| Columna | Tipo | Nulo | PK | FK | Descripción |
+|---|---|---|---|---|---|
+| id | BIGINT | NO | ✅ | | Llave primaria |
+| barbero_id | BIGINT | NO | | ✅ usuarios(id) | Barbero |
+| dia_semana | ENUM('MONDAY','TUESDAY','WEDNESDAY','THURSDAY','FRIDAY','SATURDAY','SUNDAY') | NO | | | Día de la semana |
+| hora_inicio | TIME(6) | SÍ | | | Hora de inicio (null si libre) |
+| hora_fin | TIME(6) | SÍ | | | Hora de fin (null si libre) |
+| libre | BIT | NO | | | true = día libre, false = día laboral |
+| activo | BIT | NO | | | Indica si está activo |
 
 ---
 
-# Relaciones
+## Tabla: `excepciones_horario`
 
-* Una barbería puede tener muchos usuarios.
-* Una barbería puede tener muchos servicios.
-* Una barbería puede tener muchos clientes.
-* Una barbería puede tener muchas citas.
-* Un rol puede estar asignado a muchos usuarios.
-* Un cliente puede tener muchas citas.
-* Un servicio puede ser solicitado en muchas citas.
-* Un usuario (barbero) puede atender muchas citas.
-* Una cita puede tener un pago asociado.
-* Una cita puede registrar múltiples cambios en el historial.
-* Un usuario puede tener múltiples horarios laborales.
-* Un usuario puede tener múltiples bloqueos de horario.
+| Columna | Tipo | Nulo | PK | FK | Descripción |
+|---|---|---|---|---|---|
+| id | BIGINT | NO | ✅ | | Llave primaria |
+| barbero_id | BIGINT | NO | | ✅ usuarios(id) | Barbero |
+| fecha | DATE | NO | | | Fecha de la excepción |
+| hora_inicio | TIME(6) | SÍ | | | Hora inicio (si aplica) |
+| hora_fin | TIME(6) | SÍ | | | Hora fin (si aplica) |
+| tipo | ENUM('NO_TRABAJA','TRABAJA') | NO | | | Tipo de excepción |
+| motivo | VARCHAR(255) | SÍ | | | Motivo |
+
+---
+
+## Tabla: `solicitudes_cambio_cita`
+
+| Columna | Tipo | Nulo | PK | FK | Descripción |
+|---|---|---|---|---|---|
+| id | BIGINT | NO | ✅ | | Llave primaria |
+| cita_id | BIGINT | NO | | ✅ citas(id) | Cita asociada |
+| tipo | ENUM('CANCELACION','EDICION') | NO | | | Tipo de solicitud |
+| nueva_fecha | DATE | SÍ | | | Nueva fecha (si aplica) |
+| nueva_hora_inicio | TIME(6) | SÍ | | | Nueva hora inicio (si aplica) |
+| estado_solicitud | ENUM('PENDIENTE','APROBADA','RECHAZADA') | NO | | | Estado de la solicitud |
+| motivo_rechazo | VARCHAR(500) | SÍ | | | Motivo de rechazo |
+| fecha_solicitud | DATETIME(6) | NO | | | Fecha de la solicitud |
+| fecha_respuesta | DATETIME(6) | SÍ | | | Fecha de respuesta |
+
+---
+
+## Relaciones
+
+- Una barbería puede tener muchos usuarios.
+- Una barbería puede tener muchos servicios.
+- Una barbería puede tener muchas citas.
+- Un barbero puede ofrecer muchos servicios (M:N mediante `barbero_servicios`).
+- Un servicio puede ser ofrecido por muchos barberos (M:N mediante `barbero_servicios`).
+- Una cita pertenece a un barbero y a un cliente (ambos son usuarios).
+- Una cita puede incluir muchos servicios (M:N mediante `cita_servicios`).
+- Un barbero puede tener muchos horarios generales.
+- Un barbero puede tener muchas excepciones de horario.
+- Una cita puede tener muchas solicitudes de cambio.

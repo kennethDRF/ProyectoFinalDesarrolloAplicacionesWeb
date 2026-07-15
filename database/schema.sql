@@ -1,90 +1,154 @@
-USE barbexappdb;
-INSERT INTO rol (nombre, descripcion) VALUES
-('DUEÑO', 'Usuario administrador de la barbería'),
-('EMPLEADO', 'Barbero o colaborador de la barbería');
+-- Estructura de la base de datos Barbex ejecutar antes de seed-datos.sql
 
-INSERT INTO barberia (barberia_id, nombre, telefono, correo, direccion, activo) VALUES
-(1, 'Barbería El Corte Fino', '8888-1111', 'cortefino@gmail.com', 'San José, Costa Rica', TRUE),
-(2, 'Barbería Urban Style', '8888-2222', 'urbanstyle@gmail.com', 'Cartago, Costa Rica', TRUE),
-(3, 'Barbería Classic Men', '8888-3333', 'classicmen@gmail.com', 'Heredia, Costa Rica', TRUE);
+DROP DATABASE IF EXISTS barbex_db;
+CREATE DATABASE barbex_db CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
+USE barbex_db;
 
-INSERT INTO usuario (usuario_id, barberia_id, rol_id, nombre_completo, correo, telefono, password_hash, activo) VALUES
-(1, 1, 1, 'Carlos Ramírez Soto', 'carlos@cortefino.com', '7000-1111', '123456hash', TRUE),
-(2, 1, 2, 'Andrés Mora Pérez', 'andres@cortefino.com', '7000-2222', '123456hash', TRUE),
-(3, 1, 2, 'Luis Herrera Díaz', 'luis@cortefino.com', '7000-3333', '123456hash', TRUE),
+SET FOREIGN_KEY_CHECKS = 0;
 
-(4, 2, 1, 'Mariana Solano Rojas', 'mariana@urbanstyle.com', '7100-1111', '123456hash', TRUE),
-(5, 2, 2, 'Kevin Castro Vega', 'kevin@urbanstyle.com', '7100-2222', '123456hash', TRUE),
+DROP TABLE IF EXISTS `barberias`;
 
-(6, 3, 1, 'Roberto Jiménez Arias', 'roberto@classicmen.com', '7200-1111', '123456hash', TRUE),
-(7, 3, 2, 'Daniel Gómez Ruiz', 'daniel@classicmen.com', '7200-2222', '123456hash', TRUE);
+CREATE TABLE `barberias` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `codigo_acceso` varchar(20) DEFAULT NULL,
+  `direccion` varchar(255) DEFAULT NULL,
+  `fecha_registro` datetime(6) NOT NULL,
+  `nombre` varchar(100) NOT NULL,
+  `telefono` varchar(20) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `UKd15had9up1m415xlbnywseh79` (`codigo_acceso`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
-INSERT INTO cliente (cliente_id, barberia_id, nombre_completo, telefono, correo) VALUES
-(1, 1, 'José Pablo Vargas', '8500-1111', 'josevargas@gmail.com'),
-(2, 1, 'Miguel Ángel Rojas', '8500-2222', 'miguelrojas@gmail.com'),
-(3, 1, 'Sebastián Calderón', '8500-3333', 'sebastianc@gmail.com'),
+DROP TABLE IF EXISTS `usuarios`;
 
-(4, 2, 'Diego Fernández', '8600-1111', 'diegofernandez@gmail.com'),
-(5, 2, 'Esteban Alvarado', '8600-2222', 'estebanalvarado@gmail.com'),
+CREATE TABLE `usuarios` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `activo` bit(1) NOT NULL,
+  `email` varchar(100) NOT NULL,
+  `nombre_completo` varchar(100) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `rol` enum('BARBERO','CLIENTE') NOT NULL,
+  `telefono` varchar(20) DEFAULT NULL,
+  `barberia_id` bigint NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `UKkfsp0s1tflm1cwlj8idhqsad0` (`email`),
+  KEY `FK462ius3asmam1b9xfj1he04fn` (`barberia_id`),
+  CONSTRAINT `FK462ius3asmam1b9xfj1he04fn` FOREIGN KEY (`barberia_id`) REFERENCES `barberias` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
-(6, 3, 'Mauricio Salas', '8700-1111', 'mauriciosalas@gmail.com'),
-(7, 3, 'Anthony Méndez', '8700-2222', 'anthonymendez@gmail.com');
+DROP TABLE IF EXISTS `servicios`;
 
-INSERT INTO servicio (servicio_id, barberia_id, nombre, descripcion, precio, duracion_minutos, activo) VALUES
-(1, 1, 'Corte clásico', 'Corte básico para caballero', 5000.00, 30, TRUE),
-(2, 1, 'Barba', 'Arreglo y perfilado de barba', 3500.00, 20, TRUE),
-(3, 1, 'Corte + Barba', 'Servicio completo de corte y barba', 7500.00, 50, TRUE),
+CREATE TABLE `servicios` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `activo` bit(1) NOT NULL,
+  `descripcion` varchar(500) DEFAULT NULL,
+  `duracion_minutos` int NOT NULL,
+  `monto_adelanto` decimal(10,2) DEFAULT NULL,
+  `nombre` varchar(100) NOT NULL,
+  `precio` decimal(10,2) NOT NULL,
+  `barberia_id` bigint NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `FK3muqnkhkfdlkgdmvfbt88ydlj` (`barberia_id`),
+  CONSTRAINT `FK3muqnkhkfdlkgdmvfbt88ydlj` FOREIGN KEY (`barberia_id`) REFERENCES `barberias` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
-(4, 2, 'Fade', 'Corte moderno estilo fade', 6000.00, 40, TRUE),
-(5, 2, 'Diseño de cejas', 'Diseño y limpieza de cejas', 2500.00, 15, TRUE),
-(6, 2, 'Corte premium', 'Corte con lavado y acabado', 8500.00, 60, TRUE),
+DROP TABLE IF EXISTS `barbero_servicios`;
 
-(7, 3, 'Corte tradicional', 'Corte tradicional para caballero', 4500.00, 30, TRUE),
-(8, 3, 'Alisado', 'Tratamiento de alisado masculino', 15000.00, 90, TRUE),
-(9, 3, 'Barba premium', 'Barba con toalla caliente', 5000.00, 30, TRUE);
+CREATE TABLE `barbero_servicios` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `barbero_id` bigint NOT NULL,
+  `servicio_id` bigint NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `FKns9fdvcv9xdlweomv3ev1r6wu` (`barbero_id`),
+  KEY `FKmd50wbficx5lv7fyj71tmmr0y` (`servicio_id`),
+  CONSTRAINT `FKmd50wbficx5lv7fyj71tmmr0y` FOREIGN KEY (`servicio_id`) REFERENCES `servicios` (`id`),
+  CONSTRAINT `FKns9fdvcv9xdlweomv3ev1r6wu` FOREIGN KEY (`barbero_id`) REFERENCES `usuarios` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
-INSERT INTO cita (cita_id, barberia_id, cliente_id, servicio_id, barbero_usuario_id, fecha_cita, hora_inicio, hora_fin, estado, observaciones) VALUES
-(1, 1, 1, 1, 2, '2026-07-10', '09:00:00', '09:30:00', 'PENDIENTE', 'Cliente solicita corte bajo'),
-(2, 1, 2, 3, 3, '2026-07-10', '10:00:00', '10:50:00', 'ACEPTADO', 'Corte completo'),
-(3, 1, 3, 2, 2, '2026-07-11', '14:00:00', '14:20:00', 'TERMINADO', 'Solo arreglo de barba'),
+DROP TABLE IF EXISTS `citas`;
 
-(4, 2, 4, 4, 5, '2026-07-12', '11:00:00', '11:40:00', 'PENDIENTE', 'Fade medio'),
-(5, 2, 5, 6, 5, '2026-07-12', '15:00:00', '16:00:00', 'ACEPTADO', 'Corte premium'),
+CREATE TABLE `citas` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `adelanto_pagado` bit(1) NOT NULL,
+  `comprobante_adelanto` varchar(100) DEFAULT NULL,
+  `estado` enum('CANCELADA','COMPLETADA','CONFIRMADA','PENDIENTE','RECHAZADA') NOT NULL,
+  `fecha` date NOT NULL,
+  `fecha_creacion` datetime(6) NOT NULL,
+  `hora_fin` time(6) NOT NULL,
+  `hora_inicio` time(6) NOT NULL,
+  `monto_adelanto` decimal(10,2) DEFAULT NULL,
+  `monto_total` decimal(10,2) NOT NULL,
+  `motivo_cancelacion` varchar(500) DEFAULT NULL,
+  `barberia_id` bigint NOT NULL,
+  `barbero_id` bigint NOT NULL,
+  `cliente_id` bigint NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `FK33xxvwvo497ou8vultr351mvg` (`barberia_id`),
+  KEY `FKpuiuwn6ymwdm1tw8lcy0rbyrd` (`barbero_id`),
+  KEY `FKcitrr49x1d6tcxpajkj7yj1mm` (`cliente_id`),
+  CONSTRAINT `FK33xxvwvo497ou8vultr351mvg` FOREIGN KEY (`barberia_id`) REFERENCES `barberias` (`id`),
+  CONSTRAINT `FKcitrr49x1d6tcxpajkj7yj1mm` FOREIGN KEY (`cliente_id`) REFERENCES `usuarios` (`id`),
+  CONSTRAINT `FKpuiuwn6ymwdm1tw8lcy0rbyrd` FOREIGN KEY (`barbero_id`) REFERENCES `usuarios` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
-(6, 3, 6, 7, 7, '2026-07-13', '08:30:00', '09:00:00', 'PENDIENTE', 'Corte tradicional'),
-(7, 3, 7, 8, 7, '2026-07-14', '13:00:00', '14:30:00', 'CANCELADO', 'Cliente canceló'),
-(8, 3, 6, 9, 7, '2026-07-15', '16:00:00', '16:30:00', 'ACEPTADO', 'Barba premium');
+DROP TABLE IF EXISTS `cita_servicios`;
 
-INSERT INTO pago (pago_id, cita_id, monto, comprobante_url, estado, revisado_por_usuario_id) VALUES
-(1, 1, 2500.00, 'https://imagenes.com/comprobante1.jpg', 'PENDIENTE DE REVISION', NULL),
-(2, 2, 4000.00, 'https://imagenes.com/comprobante2.jpg', 'APROBADO', 1),
-(3, 4, 3000.00, 'https://imagenes.com/comprobante3.jpg', 'PENDIENTE DE REVISION', NULL),
-(4, 5, 5000.00, 'https://imagenes.com/comprobante4.jpg', 'APROBADO', 4),
-(5, 8, 2500.00, 'https://imagenes.com/comprobante5.jpg', 'RECHAZADO', 6);
+CREATE TABLE `cita_servicios` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `cita_id` bigint NOT NULL,
+  `servicio_id` bigint NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `FK1bopji12796dyd9egdylg828i` (`cita_id`),
+  KEY `FK5lpsx6uey11rebxy3ghf7m9os` (`servicio_id`),
+  CONSTRAINT `FK1bopji12796dyd9egdylg828i` FOREIGN KEY (`cita_id`) REFERENCES `citas` (`id`),
+  CONSTRAINT `FK5lpsx6uey11rebxy3ghf7m9os` FOREIGN KEY (`servicio_id`) REFERENCES `servicios` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
-INSERT INTO horario_trabajo (horario_id, usuario_id, dia_semana, hora_inicio, hora_fin, activo) VALUES
-(1, 2, 'LUNES', '08:00:00', '17:00:00', TRUE),
-(2, 2, 'MARTES', '08:00:00', '17:00:00', TRUE),
-(3, 3, 'MIERCOLES', '09:00:00', '18:00:00', TRUE),
-(4, 3, 'JUEVES', '09:00:00', '18:00:00', TRUE),
+DROP TABLE IF EXISTS `horarios_generales`;
 
-(5, 5, 'LUNES', '10:00:00', '19:00:00', TRUE),
-(6, 5, 'VIERNES', '10:00:00', '19:00:00', TRUE),
+CREATE TABLE `horarios_generales` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `activo` bit(1) NOT NULL,
+  `dia_semana` enum('FRIDAY','MONDAY','SATURDAY','SUNDAY','THURSDAY','TUESDAY','WEDNESDAY') NOT NULL,
+  `hora_fin` time(6) DEFAULT NULL,
+  `hora_inicio` time(6) DEFAULT NULL,
+  `libre` bit(1) NOT NULL,
+  `barbero_id` bigint NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `FKo9uuh018ojl8yoxe2m5krwo5k` (`barbero_id`),
+  CONSTRAINT `FKo9uuh018ojl8yoxe2m5krwo5k` FOREIGN KEY (`barbero_id`) REFERENCES `usuarios` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
-(7, 7, 'MARTES', '08:00:00', '16:00:00', TRUE),
-(8, 7, 'SABADO', '09:00:00', '15:00:00', TRUE);
+DROP TABLE IF EXISTS `excepciones_horario`;
 
-INSERT INTO tiempo_bloqueado (tiempo_bloqueado_id, usuario_id, fecha_bloqueo, hora_inicio, hora_fin, razon) VALUES
-(1, 2, '2026-07-10', '12:00:00', '13:00:00', 'Almuerzo'),
-(2, 3, '2026-07-11', '15:00:00', '16:00:00', 'Permiso personal'),
-(3, 5, '2026-07-12', '13:00:00', '14:00:00', 'Reunión interna'),
-(4, 7, '2026-07-14', '10:00:00', '11:00:00', 'Ausencia programada');
+CREATE TABLE `excepciones_horario` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `fecha` date NOT NULL,
+  `hora_fin` time(6) DEFAULT NULL,
+  `hora_inicio` time(6) DEFAULT NULL,
+  `motivo` varchar(255) DEFAULT NULL,
+  `tipo` enum('NO_TRABAJA','TRABAJA') NOT NULL,
+  `barbero_id` bigint NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `FKjptboxx7tt6ehn5ii4fokde92` (`barbero_id`),
+  CONSTRAINT `FKjptboxx7tt6ehn5ii4fokde92` FOREIGN KEY (`barbero_id`) REFERENCES `usuarios` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
-INSERT INTO historial_cita (historial_id, cita_id, cambiado_por_usuario_id, estado_anterior, estado_nuevo, comentario) VALUES
-(1, 1, 2, NULL, 'PENDIENTE', 'Cita creada por el cliente'),
-(2, 2, 3, 'PENDIENTE', 'ACEPTADO', 'Cita aceptada por el barbero'),
-(3, 3, 2, 'ACEPTADO', 'TERMINADO', 'Servicio finalizado'),
-(4, 4, 5, NULL, 'PENDIENTE', 'Cita registrada'),
-(5, 5, 5, 'PENDIENTE', 'ACEPTADO', 'Cita confirmada'),
-(6, 7, 7, 'PENDIENTE', 'CANCELADO', 'Cliente solicitó cancelar la cita'),
-(7, 8, 7, 'PENDIENTE', 'ACEPTADO', 'Cita aceptada correctamente');
+DROP TABLE IF EXISTS `solicitudes_cambio_cita`;
+
+CREATE TABLE `solicitudes_cambio_cita` (
+  `id` bigint NOT NULL AUTO_INCREMENT,
+  `estado_solicitud` enum('APROBADA','PENDIENTE','RECHAZADA') NOT NULL,
+  `fecha_respuesta` datetime(6) DEFAULT NULL,
+  `fecha_solicitud` datetime(6) NOT NULL,
+  `motivo_rechazo` varchar(500) DEFAULT NULL,
+  `nueva_fecha` date DEFAULT NULL,
+  `nueva_hora_inicio` time(6) DEFAULT NULL,
+  `tipo` enum('CANCELACION','EDICION') NOT NULL,
+  `cita_id` bigint NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `FK4y44w2l26it1n1cgp6bvenmlh` (`cita_id`),
+  CONSTRAINT `FK4y44w2l26it1n1cgp6bvenmlh` FOREIGN KEY (`cita_id`) REFERENCES `citas` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+SET FOREIGN_KEY_CHECKS = 1;

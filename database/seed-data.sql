@@ -1,132 +1,79 @@
-CREATE DATABASE IF NOT EXISTS barbexappdb;
+USE barbex_db;
 
-USE barbexappdb;
+SET FOREIGN_KEY_CHECKS = 0;
 
-DROP TABLE IF EXISTS historial_cita;
-DROP TABLE IF EXISTS pago;
-DROP TABLE IF EXISTS tiempo_bloqueado;
-DROP TABLE IF EXISTS horario_trabajo;
-DROP TABLE IF EXISTS cita;
-DROP TABLE IF EXISTS cliente;
-DROP TABLE IF EXISTS servicio;
-DROP TABLE IF EXISTS usuario;
-DROP TABLE IF EXISTS rol;
-DROP TABLE IF EXISTS barberia;
+TRUNCATE TABLE solicitudes_cambio_cita;
+TRUNCATE TABLE cita_servicios;
+TRUNCATE TABLE citas;
+TRUNCATE TABLE horarios_generales;
+TRUNCATE TABLE excepciones_horario;
+TRUNCATE TABLE barbero_servicios;
+TRUNCATE TABLE servicios;
+TRUNCATE TABLE usuarios;
+TRUNCATE TABLE barberias;
 
-CREATE TABLE barberia (
-    barberia_id INT AUTO_INCREMENT PRIMARY KEY,
-    nombre VARCHAR(120) NOT NULL,
-    telefono VARCHAR(20) NOT NULL,
-    correo VARCHAR(120),
-    direccion VARCHAR(255),
-    activo BOOLEAN NOT NULL DEFAULT TRUE
-);
+SET FOREIGN_KEY_CHECKS = 1;
 
-CREATE TABLE rol (
-    rol_id INT AUTO_INCREMENT PRIMARY KEY,
-    nombre VARCHAR(50) NOT NULL,
-    descripcion VARCHAR(150)
-);
+INSERT INTO barberias (id, nombre, direccion, telefono, codigo_acceso, fecha_registro) VALUES
+(1, 'Barberia Centro', 'San Jose, Costa Rica', '2222-1111', 'BAR001', NOW()),
+(2, 'Barberia Escazu', 'Escazu, Costa Rica', '2222-2222', 'BAR002', NOW());
 
-CREATE TABLE usuario (
-    usuario_id INT AUTO_INCREMENT PRIMARY KEY,
-    barberia_id INT NOT NULL,
-    rol_id INT NOT NULL,
-    nombre_completo VARCHAR(120) NOT NULL,
-    correo VARCHAR(120) NOT NULL,
-    telefono VARCHAR(20),
-    password_hash VARCHAR(255) NOT NULL,
-    activo BOOLEAN NOT NULL DEFAULT TRUE,
+INSERT INTO usuarios (id, email, password, nombre_completo, telefono, rol, activo, barberia_id) VALUES
+(1, 'barbero1@barbex.com', '123456', 'Carlos Barbero', '8888-1111', 'BARBERO', true, 1);
 
-    FOREIGN KEY (barberia_id) REFERENCES barberia(barberia_id),
-    FOREIGN KEY (rol_id) REFERENCES rol(rol_id)
-);
+INSERT INTO usuarios (id, email, password, nombre_completo, telefono, rol, activo, barberia_id) VALUES
+(2, 'barbero2@barbex.com', '123456', 'Diego Estilista', '8888-5555', 'BARBERO', true, 2);
 
-CREATE TABLE cliente (
-    cliente_id INT AUTO_INCREMENT PRIMARY KEY,
-    barberia_id INT NOT NULL,
-    nombre_completo VARCHAR(120) NOT NULL,
-    telefono VARCHAR(20) NOT NULL,
-    correo VARCHAR(120),
+INSERT INTO usuarios (id, email, password, nombre_completo, telefono, rol, activo, barberia_id) VALUES
+(3, 'cliente1@barbex.com', '123456', 'Ana Lopez', '8888-2222', 'CLIENTE', true, 1),
+(4, 'cliente2@barbex.com', '123456', 'Luis Mora', '8888-3333', 'CLIENTE', true, 1),
+(5, 'cliente3@barbex.com', '123456', 'Maria Soto', '8888-4444', 'CLIENTE', true, 1);
 
-    FOREIGN KEY (barberia_id) REFERENCES barberia(barberia_id)
-);
+INSERT INTO usuarios (id, email, password, nombre_completo, telefono, rol, activo, barberia_id) VALUES
+(6, 'cliente4@barbex.com', '123456', 'Sofia Rojas', '8888-6666', 'CLIENTE', true, 2),
+(7, 'cliente5@barbex.com', '123456', 'Pedro Vega', '8888-7777', 'CLIENTE', true, 2),
+(8, 'cliente6@barbex.com', '123456', 'Elena Cruz', '8888-8888', 'CLIENTE', true, 2);
 
-CREATE TABLE servicio (
-    servicio_id INT AUTO_INCREMENT PRIMARY KEY,
-    barberia_id INT NOT NULL,
-    nombre VARCHAR(100) NOT NULL,
-    descripcion VARCHAR(300),
-    precio DECIMAL(10,2) NOT NULL,
-    duracion_minutos INT NOT NULL,
-    activo BOOLEAN NOT NULL DEFAULT TRUE,
+INSERT INTO servicios (id, nombre, descripcion, precio, duracion_minutos, monto_adelanto, activo, barberia_id) VALUES
+(1, 'Corte clasico', 'Corte de cabello tradicional con tijera y maquina', 8000.00, 30, 2000.00, true, 1),
+(2, 'Corte y barba', 'Corte de cabello mas arreglo de barba', 12000.00, 45, 3000.00, true, 1),
+(3, 'Afeitado', 'Afeitado con navaja y toalla caliente', 6000.00, 30, 1500.00, true, 1),
+(4, 'Tratamiento capilar', 'Tratamiento hidratante para cabello', 15000.00, 60, 0.00, true, 1),
+(5, 'Corte infantil', 'Corte especial para ninos', 5000.00, 30, 0.00, true, 1);
 
-    FOREIGN KEY (barberia_id) REFERENCES barberia(barberia_id)
-);
+INSERT INTO servicios (id, nombre, descripcion, precio, duracion_minutos, monto_adelanto, activo, barberia_id) VALUES
+(6, 'Fade premium', 'Corte fade con acabado premium', 10000.00, 30, 2500.00, true, 2),
+(7, 'Rasurado completo', 'Rasurado de cabeza completa con navaja', 8000.00, 45, 2000.00, true, 2),
+(8, 'Tinte barba', 'Tinte natural para barba', 20000.00, 60, 0.00, true, 2),
+(9, 'Cejas', 'Arreglo de cejas', 4000.00, 15, 0.00, true, 2),
+(10, 'Alisado', 'Alisado de cabello masculino', 25000.00, 90, 5000.00, true, 2);
 
-CREATE TABLE cita (
-    cita_id INT AUTO_INCREMENT PRIMARY KEY,
-    barberia_id INT NOT NULL,
-    cliente_id INT NOT NULL,
-    servicio_id INT NOT NULL,
-    barbero_usuario_id INT NOT NULL,
-    fecha_cita DATE NOT NULL,
-    hora_inicio TIME NOT NULL,
-    hora_fin TIME NOT NULL,
-    estado VARCHAR(30) NOT NULL DEFAULT 'PENDIENTE',
-    observaciones VARCHAR(300),
+INSERT INTO barbero_servicios (barbero_id, servicio_id) VALUES
+(1, 1), (1, 2), (1, 3), (1, 4), (1, 5),
+(2, 6), (2, 7), (2, 8), (2, 9), (2, 10);
 
-    FOREIGN KEY (barberia_id) REFERENCES barberia(barberia_id),
-    FOREIGN KEY (cliente_id) REFERENCES cliente(cliente_id),
-    FOREIGN KEY (servicio_id) REFERENCES servicio(servicio_id),
-    FOREIGN KEY (barbero_usuario_id) REFERENCES usuario(usuario_id)
-);
+INSERT INTO horarios_generales (dia_semana, libre, hora_inicio, hora_fin, activo, barbero_id) VALUES
+('MONDAY', false, '09:00:00', '19:00:00', true, 1),
+('TUESDAY', false, '09:00:00', '19:00:00', true, 1),
+('WEDNESDAY', false, '09:00:00', '19:00:00', true, 1),
+('THURSDAY', false, '09:00:00', '19:00:00', true, 1),
+('FRIDAY', false, '09:00:00', '19:00:00', true, 1),
+('SATURDAY', false, '09:00:00', '14:00:00', true, 1),
+('SUNDAY', true, NULL, NULL, true, 1),
+('MONDAY', false, '09:00:00', '19:00:00', true, 2),
+('TUESDAY', false, '09:00:00', '19:00:00', true, 2),
+('WEDNESDAY', false, '09:00:00', '19:00:00', true, 2),
+('THURSDAY', false, '09:00:00', '19:00:00', true, 2),
+('FRIDAY', false, '09:00:00', '19:00:00', true, 2),
+('SATURDAY', false, '09:00:00', '14:00:00', true, 2),
+('SUNDAY', true, NULL, NULL, true, 2);
 
-CREATE TABLE pago (
-    pago_id INT AUTO_INCREMENT PRIMARY KEY,
-    cita_id INT NOT NULL,
-    monto DECIMAL(10,2) NOT NULL,
-    comprobante_url VARCHAR(500),
-    estado VARCHAR(40) NOT NULL DEFAULT 'PENDIENTE DE REVISION',
-    revisado_por_usuario_id INT,
-
-    FOREIGN KEY (cita_id) REFERENCES cita(cita_id),
-    FOREIGN KEY (revisado_por_usuario_id) REFERENCES usuario(usuario_id)
-);
-
-CREATE TABLE horario_trabajo (
-    horario_id INT AUTO_INCREMENT PRIMARY KEY,
-    usuario_id INT NOT NULL,
-    dia_semana VARCHAR(20) NOT NULL,
-    hora_inicio TIME NOT NULL,
-    hora_fin TIME NOT NULL,
-    activo BOOLEAN NOT NULL DEFAULT TRUE,
-
-    FOREIGN KEY (usuario_id) REFERENCES usuario(usuario_id)
-);
-
-CREATE TABLE tiempo_bloqueado (
-    tiempo_bloqueado_id INT AUTO_INCREMENT PRIMARY KEY,
-    usuario_id INT NOT NULL,
-    fecha_bloqueo DATE NOT NULL,
-    hora_inicio TIME NOT NULL,
-    hora_fin TIME NOT NULL,
-    razon VARCHAR(255),
-
-    FOREIGN KEY (usuario_id) REFERENCES usuario(usuario_id)
-);
-
-CREATE TABLE historial_cita (
-    historial_id INT AUTO_INCREMENT PRIMARY KEY,
-    cita_id INT NOT NULL,
-    cambiado_por_usuario_id INT,
-    estado_anterior VARCHAR(30),
-    estado_nuevo VARCHAR(30) NOT NULL,
-    comentario VARCHAR(300),
-
-    FOREIGN KEY (cita_id) REFERENCES cita(cita_id),
-    FOREIGN KEY (cambiado_por_usuario_id) REFERENCES usuario(usuario_id)
-);
-
-
-
+ALTER TABLE barberias AUTO_INCREMENT = 3;
+ALTER TABLE usuarios AUTO_INCREMENT = 9;
+ALTER TABLE servicios AUTO_INCREMENT = 11;
+ALTER TABLE barbero_servicios AUTO_INCREMENT = 11;
+ALTER TABLE horarios_generales AUTO_INCREMENT = 15;
+ALTER TABLE citas AUTO_INCREMENT = 1;
+ALTER TABLE cita_servicios AUTO_INCREMENT = 1;
+ALTER TABLE solicitudes_cambio_cita AUTO_INCREMENT = 1;
+ALTER TABLE excepciones_horario AUTO_INCREMENT = 1;
