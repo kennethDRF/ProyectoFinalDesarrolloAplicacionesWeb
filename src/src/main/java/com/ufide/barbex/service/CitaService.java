@@ -110,6 +110,14 @@ public class CitaService {
                     s.getMontoAdelanto() != null ? s.getMontoAdelanto() : BigDecimal.ZERO);
         }
 
+        if (montoAdelanto.compareTo(BigDecimal.ZERO) > 0) {
+            boolean comprobanteValido = comprobanteAdelanto != null && !comprobanteAdelanto.trim().isEmpty();
+            if (!adelantoPagado || !comprobanteValido) {
+                throw new RuntimeException(
+                        "No puedes agendar este servicio sin pagar el adelanto. Marca la casilla y proporciona el numero de comprobante");
+            }
+        }
+
         LocalTime horaFin = horaInicio.plusMinutes(duracionTotal);
 
         validarCita(barberoId, fecha, horaInicio, horaFin, null);
@@ -136,17 +144,12 @@ public class CitaService {
             citaServicioRepository.save(cs);
         }
 
-        if (cita.getEstado() == EstadoCita.RECHAZADA) {
-            cita.setMotivoCancelacion("Falta de adelanto o comprobante incorrecto");
-            citaRepository.save(cita);
-        }
-
         return cita;
     }
 
     private EstadoCita determinarEstadoInicial(BigDecimal montoAdelanto, boolean adelantoPagado) {
         if (montoAdelanto.compareTo(BigDecimal.ZERO) > 0) {
-            return adelantoPagado ? EstadoCita.PENDIENTE : EstadoCita.RECHAZADA;
+            return EstadoCita.PENDIENTE;
         }
         return EstadoCita.CONFIRMADA;
     }

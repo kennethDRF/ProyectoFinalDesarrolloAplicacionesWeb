@@ -66,7 +66,7 @@
                                 </td>
                                 <td th:text="${'$' + c.montoTotal}"></td>
                                 <td>
-                                    <span class="badge" th:classappend="'estado-' + ${c.estado}" th:switch="${c.estado}">
+                                    <span class="badge" th:classappend="'estado-' + ${c.estado}" th:switch="${c.estado.name()}">
                                         <span th:case="'PENDIENTE'" th:text="#{estado.PENDIENTE}">Pendiente</span>
                                         <span th:case="'CONFIRMADA'" th:text="#{estado.CONFIRMADA}">Confirmada</span>
                                         <span th:case="'COMPLETADA'" th:text="#{estado.COMPLETADA}">Completada</span>

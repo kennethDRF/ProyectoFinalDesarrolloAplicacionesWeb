@@ -116,6 +116,7 @@
             const TEXTO_MOTIVO = [[#{horario.motivo}]];
             const TEXTO_HORARIO_SEMANAL = [[#{horario.semanal}]];
             const TEXTO_HORA_INVALIDA = [[#{cita.horaInvalida}]];
+            const TEXTO_ADELANTO_REQUERIDO = [[#{cita.adelantoRequerido}]];
 
             function formatearDinero(valor) {
                 return '$' + parseFloat(valor).toLocaleString('es-CR', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
@@ -241,8 +242,43 @@
                     inputHora.classList.add('is-invalid');
                     inputHora.focus();
                     e.preventDefault();
-                    alert(TEXTO_HORA_INVALIDA);
+                    mostrarToastError(TEXTO_HORA_INVALIDA);
+                    return;
                 }
+
+                let adelanto = 0;
+                document.querySelectorAll('.input-servicio:checked').forEach(function(checkbox) {
+                    const servicio = serviciosData.find(s => s.id == checkbox.value);
+                    if (servicio) {
+                        adelanto += parseFloat(servicio.montoAdelanto);
+                    }
+                });
+
+                if (adelanto > 0) {
+                    const chkAdelanto = document.getElementById('adelantoPagado');
+                    const inputComprobante = document.querySelector('input[name="comprobanteAdelanto"]');
+                    if (!chkAdelanto.checked || inputComprobante.value.trim() === '') {
+                        chkAdelanto.classList.add('is-invalid');
+                        inputComprobante.classList.add('is-invalid');
+                        if (!chkAdelanto.checked) {
+                            chkAdelanto.focus();
+                        } else {
+                            inputComprobante.focus();
+                        }
+                        e.preventDefault();
+                        mostrarToastError(TEXTO_ADELANTO_REQUERIDO);
+                    }
+                }
+            });
+
+            document.getElementById('adelantoPagado').addEventListener('change', function() {
+                this.classList.remove('is-invalid');
+                document.querySelector('input[name="comprobanteAdelanto"]').classList.remove('is-invalid');
+            });
+
+            document.querySelector('input[name="comprobanteAdelanto"]').addEventListener('input', function() {
+                this.classList.remove('is-invalid');
+                document.getElementById('adelantoPagado').classList.remove('is-invalid');
             });
         </script>
     </main>

@@ -222,7 +222,7 @@
                             const minutosInicio = parseInt(partesInicio[0]) * 60 + parseInt(partesInicio[1]);
                             const minutosFin = parseInt(partesFin[0]) * 60 + parseInt(partesFin[1]);
                             if (minutosFin <= minutosInicio) {
-                                alert(TEXTO_FIN_MAYOR);
+                                mostrarToastError(TEXTO_FIN_MAYOR);
                                 valido = false;
                             }
                         }

@@ -100,6 +100,12 @@
                     <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
                 </div>
             </div>
+            <div id="toastJsError" class="toast align-items-center text-bg-danger border-0" role="alert" aria-live="assertive" aria-atomic="true" style="display:none;">
+                <div class="d-flex">
+                    <div class="toast-body" id="toastJsErrorMensaje"></div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+            </div>
         </div>
 
         <div th:replace="${content}"></div>
@@ -139,6 +145,14 @@
             if (toastOk) new bootstrap.Toast(toastOk, { delay: 5000 }).show();
             if (toastError) new bootstrap.Toast(toastError, { delay: 8000 }).show();
         });
+
+        // Toast de error generico para validaciones del lado del cliente
+        function mostrarToastError(mensaje) {
+            const toast = document.getElementById('toastJsError');
+            if (!toast) return;
+            document.getElementById('toastJsErrorMensaje').textContent = mensaje;
+            new bootstrap.Toast(toast, { delay: 8000 }).show();
+        }
 
         // Modal de confirmacion generico
         let formConfirmacion = null;
