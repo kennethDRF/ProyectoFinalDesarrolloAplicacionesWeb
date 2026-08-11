@@ -1,8 +1,9 @@
--- Estructura de la base de datos Barbex ejecutar antes de seed-datos.sql
+-- Estructura de la base de datos Barbex
+-- Este script crea la base de datos y las tablas vacias.
+-- Ejecutar antes de seed-datos.sql
 
 DROP DATABASE IF EXISTS barbex_db;
 CREATE DATABASE barbex_db CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
-USE barbex_db;
 
 SET FOREIGN_KEY_CHECKS = 0;
 
