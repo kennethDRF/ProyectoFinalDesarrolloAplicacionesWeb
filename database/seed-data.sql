@@ -1,4 +1,4 @@
-USE barbex_db;
+-- USE barbex_db; (comentado para deploy: en Aiven se conecta directo a la BD, ej. defaultdb)
 
 SET FOREIGN_KEY_CHECKS = 0;
 
