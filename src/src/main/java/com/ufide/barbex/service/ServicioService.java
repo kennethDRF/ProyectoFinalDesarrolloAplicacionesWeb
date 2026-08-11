@@ -35,6 +35,10 @@ public class ServicioService {
         return servicioRepository.findByBarberiaIdAndActivoTrue(barberiaId);
     }
 
+    public List<Servicio> listarTodas() {
+        return servicioRepository.findAll();
+    }
+
     public Optional<Servicio> findById(Long id) {
         return servicioRepository.findById(id);
     }
