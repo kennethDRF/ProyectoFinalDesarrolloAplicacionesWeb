@@ -1,29 +1,29 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout/base :: base('Gestion de citas', ~{::main})}">
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout/base :: base(#{titulo.gestionCitas}, ~{::main})}">
 <head>
     <title>Citas</title>
 </head>
 <body>
     <main>
         <div class="d-flex justify-content-between align-items-center mb-4">
-            <h1>Mis citas</h1>
-            <a th:href="@{/cliente/citas/nueva}" class="btn btn-primary">Nueva cita</a>
+            <h1 th:text="#{cliente.dashboard.misCitas}">Mis citas</h1>
+            <a th:href="@{/cliente/citas/nueva}" class="btn btn-primary" th:text="#{common.nuevaCita}">Nueva cita</a>
         </div>
 
         <div class="card shadow">
             <div class="card-body">
-                <h5 class="card-title mb-3">Historial de citas</h5>
+                <h5 class="card-title mb-3" th:text="#{cliente.dashboard.historial}">Historial de citas</h5>
                 <div class="table-responsive">
                     <table class="table table-hover">
                         <thead>
                             <tr>
-                                <th>Fecha</th>
-                                <th>Hora</th>
-                                <th>Barbero</th>
-                                <th>Servicios</th>
-                                <th>Monto total</th>
-                                <th>Estado</th>
-                                <th>Acciones</th>
+                                <th th:text="#{common.fecha}">Fecha</th>
+                                <th th:text="#{common.hora}">Hora</th>
+                                <th th:text="#{common.barbero}">Barbero</th>
+                                <th th:text="#{common.servicios}">Servicios</th>
+                                <th th:text="#{common.montoTotal}">Monto total</th>
+                                <th th:text="#{common.estado}">Estado</th>
+                                <th th:text="#{common.acciones}">Acciones</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -36,14 +36,20 @@
                                 </td>
                                 <td th:text="${'$' + c.montoTotal}"></td>
                                 <td>
-                                    <span class="badge" th:classappend="'estado-' + ${c.estado}" th:text="${c.estado}"></span>
-                                    <span class="badge bg-warning" th:if="${c.vencida}">Vencida</span>
+                                    <span class="badge" th:classappend="'estado-' + ${c.estado}" th:switch="${c.estado}">
+                                        <span th:case="'PENDIENTE'" th:text="#{estado.PENDIENTE}">Pendiente</span>
+                                        <span th:case="'CONFIRMADA'" th:text="#{estado.CONFIRMADA}">Confirmada</span>
+                                        <span th:case="'COMPLETADA'" th:text="#{estado.COMPLETADA}">Completada</span>
+                                        <span th:case="'CANCELADA'" th:text="#{estado.CANCELADA}">Cancelada</span>
+                                        <span th:case="'RECHAZADA'" th:text="#{estado.RECHAZADA}">Rechazada</span>
+                                    </span>
+                                    <span class="badge bg-warning" th:if="${c.vencida}" th:text="#{common.vencida}">Vencida</span>
                                 </td>
                                 <td>
                                     <div class="btn-group btn-group-sm" th:if="${c.estado.name() != 'CANCELADA' && c.estado.name() != 'RECHAZADA' && c.estado.name() != 'COMPLETADA'}">
-                                        <a th:href="@{/cliente/citas/{id}/editar(id=${c.id})}" class="btn btn-outline-primary" title="Editar"><i class="bi bi-pencil"></i></a>
+                                        <a th:href="@{/cliente/citas/{id}/editar(id=${c.id})}" class="btn btn-outline-primary" th:title="#{common.editar}"><i class="bi bi-pencil"></i></a>
                                         <form th:action="@{/cliente/citas/{id}/solicitar-cancelacion(id=${c.id})}" method="post" class="d-inline">
-                                            <button type="submit" class="btn btn-outline-danger" title="Cancelar" onclick="return confirm('Esta seguro?')"><i class="bi bi-x-circle"></i></button>
+                                            <button type="submit" class="btn btn-outline-danger" th:title="#{cita.cancelar}" onclick="return confirm(TEXTO_CONFIRMAR_GENERICO)"><i class="bi bi-x-circle"></i></button>
                                         </form>
                                     </div>
                                 </td>
@@ -56,15 +62,15 @@
 
         <div class="card shadow mt-4" th:if="${!solicitudes.isEmpty()}">
             <div class="card-body">
-                <h5 class="card-title mb-3">Mis solicitudes</h5>
+                <h5 class="card-title mb-3" th:text="#{cliente.dashboard.misSolicitudes}">Mis solicitudes</h5>
                 <div class="table-responsive">
                     <table class="table table-sm">
                         <thead>
                             <tr>
-                                <th>Tipo</th>
-                                <th>Fecha original</th>
-                                <th>Nueva fecha</th>
-                                <th>Estado</th>
+                                <th th:text="#{common.tipo}">Tipo</th>
+                                <th th:text="#{solicitud.fechaOriginal}">Fecha original</th>
+                                <th th:text="#{solicitud.nuevaFecha}">Nueva fecha</th>
+                                <th th:text="#{common.estado}">Estado</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -79,6 +85,10 @@
                 </div>
             </div>
         </div>
+
+        <script th:inline="javascript">
+            const TEXTO_CONFIRMAR_GENERICO = [[#{confirm.generico}]];
+        </script>
     </main>
 </body>
 </html>

@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout/base :: base('Nuevo servicio', ~{::main})}">
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout/base :: base(#{titulo.nuevoServicio}, ~{::main})}">
 <head>
     <title>Nuevo servicio</title>
 </head>
 <body>
     <main>
-        <h1 class="mb-4">Nuevo servicio</h1>
+        <h1 class="mb-4" th:text="#{titulo.nuevoServicio}">Nuevo servicio</h1>
 
         <div class="card shadow">
             <div class="card-body">
@@ -13,30 +13,30 @@
                     <input type="hidden" th:field="*{barberia.id}">
 
                     <div class="mb-3">
-                        <label class="form-label">Nombre</label>
+                        <label class="form-label" th:text="#{servicio.nombre}">Nombre</label>
                         <input type="text" th:field="*{nombre}" class="form-control" required>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label">Descripcion</label>
+                        <label class="form-label" th:text="#{servicio.descripcion}">Descripcion</label>
                         <textarea th:field="*{descripcion}" class="form-control" rows="3"></textarea>
                     </div>
                     <div class="row">
                         <div class="col-md-4 mb-3">
-                            <label class="form-label">Precio</label>
+                            <label class="form-label" th:text="#{servicio.precio}">Precio</label>
                             <input type="number" step="0.01" th:field="*{precio}" class="form-control" required>
                         </div>
                         <div class="col-md-4 mb-3">
-                            <label class="form-label">Duracion (min)</label>
+                            <label class="form-label" th:text="#{servicio.duracionMin}">Duracion (min)</label>
                             <input type="number" th:field="*{duracionMinutos}" class="form-control" required>
                         </div>
                         <div class="col-md-4 mb-3">
-                            <label class="form-label">Adelanto</label>
+                            <label class="form-label" th:text="#{servicio.adelanto}">Adelanto</label>
                             <input type="number" step="0.01" th:field="*{montoAdelanto}" class="form-control">
                         </div>
                     </div>
                     <div class="d-grid gap-2">
-                        <button type="submit" class="btn btn-primary">Guardar</button>
-                        <a th:href="@{/barbero/servicios}" class="btn btn-outline-secondary">Cancelar</a>
+                        <button type="submit" class="btn btn-primary" th:text="#{common.guardar}">Guardar</button>
+                        <a th:href="@{/barbero/servicios}" class="btn btn-outline-secondary" th:text="#{common.cancelar}">Cancelar</a>
                     </div>
                 </form>
             </div>

@@ -1,47 +1,47 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout/base :: base('Horario laboral', ~{::main})}">
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout/base :: base(#{titulo.horarioLaboral}, ~{::main})}">
 <head>
     <title>Horarios</title>
 </head>
 <body>
     <main>
-        <h1 class="mb-4">Horario laboral</h1>
+        <h1 class="mb-4" th:text="#{horario.titulo}">Horario laboral</h1>
 
         <div class="row">
             <div class="col-md-8">
                 <div class="card shadow mb-4">
                     <div class="card-body">
-                        <h5 class="card-title mb-3">Horario semanal</h5>
-                        <p class="text-muted small">Marque el checkbox "Libre" para los dias que no trabaje.</p>
+                        <h5 class="card-title mb-3" th:text="#{horario.semanal}">Horario semanal</h5>
+                        <p class="text-muted small" th:text="#{horario.libreInstruccion}">Marque el checkbox Libre para los dias que no trabaje.</p>
 
                         <form id="formHorarios" th:action="@{/barbero/horarios/guardar}" method="post">
                             <div class="table-responsive">
                                 <table class="table table-sm align-middle">
                                     <thead>
                                         <tr>
-                                            <th>Dia</th>
-                                            <th class="text-center">Libre</th>
-                                            <th>Hora inicio</th>
-                                            <th>Hora fin</th>
+                                            <th th:text="#{common.dia}">Dia</th>
+                                            <th class="text-center" th:text="#{horario.libre}">Libre</th>
+                                            <th th:text="#{horario.horaInicio}">Hora inicio</th>
+                                            <th th:text="#{horario.horaFin}">Hora fin</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         <tr th:each="h, iter : ${horarios}">
                                             <td th:switch="${h.diaSemana.name()}">
-                                                <span th:case="'MONDAY'">Lunes</span>
-                                                <span th:case="'TUESDAY'">Martes</span>
-                                                <span th:case="'WEDNESDAY'">Miercoles</span>
-                                                <span th:case="'THURSDAY'">Jueves</span>
-                                                <span th:case="'FRIDAY'">Viernes</span>
-                                                <span th:case="'SATURDAY'">Sabado</span>
-                                                <span th:case="'SUNDAY'">Domingo</span>
+                                                <span th:case="'MONDAY'" th:text="#{dia.MONDAY}">Lunes</span>
+                                                <span th:case="'TUESDAY'" th:text="#{dia.TUESDAY}">Martes</span>
+                                                <span th:case="'WEDNESDAY'" th:text="#{dia.WEDNESDAY}">Miercoles</span>
+                                                <span th:case="'THURSDAY'" th:text="#{dia.THURSDAY}">Jueves</span>
+                                                <span th:case="'FRIDAY'" th:text="#{dia.FRIDAY}">Viernes</span>
+                                                <span th:case="'SATURDAY'" th:text="#{dia.SATURDAY}">Sabado</span>
+                                                <span th:case="'SUNDAY'" th:text="#{dia.SUNDAY}">Domingo</span>
                                             </td>
                                             <td class="text-center">
                                                 <input type="hidden" th:name="'diaSemana'" th:value="${h.diaSemana}">
                                                 <input type="hidden" th:name="'libre'" th:value="${h.libre}" class="libre-hidden">
                                                 <input type="checkbox" class="form-check-input checkbox-libre"
                                                        th:checked="${h.libre}"
-                                                       th:data-index="${iter.index}" title="Dia libre">
+                                                       th:data-index="${iter.index}" th:title="#{horario.diaLibre}">
                                             </td>
                                             <td>
                                                 <input type="text" th:name="'horaInicio'" class="form-control form-control-sm input-hora-inicio"
@@ -60,7 +60,7 @@
                                 </table>
                             </div>
                             <div class="d-grid">
-                                <button type="submit" class="btn btn-primary">Guardar horario semanal</button>
+                                <button type="submit" class="btn btn-primary" th:text="#{horario.guardarSemanal}">Guardar horario semanal</button>
                             </div>
                         </form>
                     </div>
@@ -70,39 +70,39 @@
             <div class="col-md-4">
                 <div class="card shadow">
                     <div class="card-body">
-                        <h5 class="card-title mb-3">Excepciones</h5>
+                        <h5 class="card-title mb-3" th:text="#{horario.excepciones}">Excepciones</h5>
                         <form id="formExcepciones" th:action="@{/barbero/excepciones/guardar}" method="post">
                             <div class="mb-2">
-                                <label class="form-label">Fecha</label>
+                                <label class="form-label" th:text="#{common.fecha}">Fecha</label>
                                 <input type="date" name="fecha" class="form-control" required>
                             </div>
                             <div class="mb-2">
-                                <label class="form-label">Tipo</label>
+                                <label class="form-label" th:text="#{common.tipo}">Tipo</label>
                                 <select name="tipo" class="form-select" required>
-                                    <option value="TRABAJA">Trabaja</option>
-                                    <option value="NO_TRABAJA">No trabaja</option>
+                                    <option value="TRABAJA" th:text="#{horario.trabaja}">Trabaja</option>
+                                    <option value="NO_TRABAJA" th:text="#{horario.noTrabaja}">No trabaja</option>
                                 </select>
                             </div>
                             <div class="row g-2 mb-2">
                                 <div class="col">
-                                    <label class="form-label">Inicio</label>
+                                    <label class="form-label" th:text="#{horario.inicio}">Inicio</label>
                                     <input type="text" name="horaInicio" class="form-control input-exc-hora"
                                            placeholder="HH:mm" maxlength="5"
                                            title="Formato 24 horas, ej: 08:00 o 18:30">
                                 </div>
                                 <div class="col">
-                                    <label class="form-label">Fin</label>
+                                    <label class="form-label" th:text="#{horario.fin}">Fin</label>
                                     <input type="text" name="horaFin" class="form-control input-exc-hora"
                                            placeholder="HH:mm" maxlength="5"
                                            title="Formato 24 horas, ej: 08:00 o 18:30">
                                 </div>
                             </div>
                             <div class="mb-2">
-                                <label class="form-label">Motivo</label>
-                                <input type="text" name="motivo" class="form-control" placeholder="Motivo">
+                                <label class="form-label" th:text="#{horario.motivo}">Motivo</label>
+                                <input type="text" name="motivo" class="form-control" th:placeholder="#{horario.motivo}">
                             </div>
                             <div class="d-grid">
-                                <button type="submit" class="btn btn-primary"><i class="bi bi-plus"></i> Agregar excepcion</button>
+                                <button type="submit" class="btn btn-primary"><i class="bi bi-plus"></i> <span th:text="#{horario.agregarExcepcion}">Agregar excepcion</span></button>
                             </div>
                         </form>
 
@@ -110,16 +110,19 @@
                             <table class="table table-sm">
                                 <thead>
                                     <tr>
-                                        <th>Fecha</th>
-                                        <th>Tipo</th>
-                                        <th>Horario</th>
+                                        <th th:text="#{common.fecha}">Fecha</th>
+                                        <th th:text="#{common.tipo}">Tipo</th>
+                                        <th th:text="#{cita.horario}">Horario</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <tr th:each="e : ${excepciones}">
                                         <td th:text="${e.fecha}"></td>
                                         <td th:text="${e.tipo}"></td>
-                                        <td th:text="${e.tipo.name() == 'NO_TRABAJA'} ? 'No trabaja' : ${e.horaInicio + ' - ' + e.horaFin}"></td>
+                                        <td th:switch="${e.tipo.name() == 'NO_TRABAJA'}">
+                                            <span th:case="true" th:text="#{horario.noTrabaja}">No trabaja</span>
+                                            <span th:case="false" th:text="${e.horaInicio + ' - ' + e.horaFin}"></span>
+                                        </td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -129,7 +132,8 @@
             </div>
         </div>
 
-        <script>
+        <script th:inline="javascript">
+            const TEXTO_FIN_MAYOR = [[#{horario.finMayor}]];
             function esHoraValida(texto) {
                 return /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/.test(texto);
             }
@@ -218,7 +222,7 @@
                             const minutosInicio = parseInt(partesInicio[0]) * 60 + parseInt(partesInicio[1]);
                             const minutosFin = parseInt(partesFin[0]) * 60 + parseInt(partesFin[1]);
                             if (minutosFin <= minutosInicio) {
-                                alert('La hora de fin debe ser mayor que la hora de inicio.');
+                                alert(TEXTO_FIN_MAYOR);
                                 valido = false;
                             }
                         }

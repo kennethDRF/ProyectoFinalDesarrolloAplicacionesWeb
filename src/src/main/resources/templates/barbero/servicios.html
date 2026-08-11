@@ -1,13 +1,13 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout/base :: base('Servicios', ~{::main})}">
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout/base :: base(#{titulo.servicios}, ~{::main})}">
 <head>
     <title>Servicios</title>
 </head>
 <body>
     <main>
         <div class="d-flex justify-content-between align-items-center mb-4">
-            <h1>Servicios</h1>
-            <a th:href="@{/barbero/servicios/nuevo}" class="btn btn-primary">Nuevo</a>
+            <h1 th:text="#{titulo.servicios}">Servicios</h1>
+            <a th:href="@{/barbero/servicios/nuevo}" class="btn btn-primary" th:text="#{common.nuevo}">Nuevo</a>
         </div>
 
         <div class="card shadow">
@@ -16,13 +16,13 @@
                     <table class="table table-hover">
                         <thead>
                             <tr>
-                                <th>Nombre</th>
-                                <th>Descripcion</th>
-                                <th>Precio</th>
-                                <th>Duracion</th>
-                                <th>Adelanto</th>
-                                <th>Activo</th>
-                                <th>Acciones</th>
+                                <th th:text="#{servicio.nombre}">Nombre</th>
+                                <th th:text="#{servicio.descripcion}">Descripcion</th>
+                                <th th:text="#{servicio.precio}">Precio</th>
+                                <th th:text="#{servicio.duracion}">Duracion</th>
+                                <th th:text="#{servicio.adelanto}">Adelanto</th>
+                                <th th:text="#{servicio.activo}">Activo</th>
+                                <th th:text="#{common.acciones}">Acciones</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -33,11 +33,11 @@
                                 <td th:text="${s.duracionMinutos + ' min'}"></td>
                                 <td th:text="${s.montoAdelanto != null ? '$' + s.montoAdelanto : '-'}"></td>
                                 <td>
-                                    <span class="badge" th:classappend="${s.activo} ? 'bg-success' : 'bg-secondary'" th:text="${s.activo} ? 'Si' : 'No'"></span>
+                                    <span class="badge" th:classappend="${s.activo} ? 'bg-success' : 'bg-secondary'" th:text="${s.activo} ? #{common.si} : #{common.no}"></span>
                                 </td>
                                 <td>
                                     <form th:action="@{/barbero/servicios/{id}/eliminar(id=${s.id})}" method="post" class="d-inline">
-                                        <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Esta seguro de eliminar este servicio definitivamente?')">
+                                        <button type="submit" class="btn btn-sm btn-danger" th:title="#{common.eliminar}" onclick="return confirm(TEXTO_CONFIRMAR_ELIMINAR)">
                                             <i class="bi bi-trash"></i>
                                         </button>
                                     </form>
@@ -48,6 +48,9 @@
                 </div>
             </div>
         </div>
+        <script th:inline="javascript">
+            const TEXTO_CONFIRMAR_ELIMINAR = [[#{confirm.eliminarServicio}]];
+        </script>
     </main>
 </body>
 </html>

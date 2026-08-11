@@ -1,14 +1,14 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout/base :: base('Citas afectadas', ~{::main})}">
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout/base :: base(#{titulo.citasAfectadas}, ~{::main})}">
 <head>
     <title>Citas afectadas</title>
 </head>
 <body>
     <main>
-        <h1 class="mb-4">Citas afectadas por cambio de horario</h1>
+        <h1 class="mb-4" th:text="#{cita.afectadas.titulo}">Citas afectadas por cambio de horario</h1>
 
-        <div class="alert alert-warning">
-            El cambio de horario afecta las siguientes citas. Debes reagendarlas o cancelarlas.
+        <div class="alert alert-warning" th:text="#{cita.afectadas.info}">
+            El cambio de horario afecta las siguientes citas.
         </div>
 
         <div class="alert alert-success" th:if="${ok}" th:text="${ok}"></div>
@@ -20,11 +20,11 @@
                     <table class="table">
                         <thead>
                             <tr>
-                                <th>Cliente</th>
-                                <th>Fecha</th>
-                                <th>Hora actual</th>
-                                <th>Reagendar</th>
-                                <th>Cancelar</th>
+                                <th th:text="#{common.cliente}">Cliente</th>
+                                <th th:text="#{common.fecha}">Fecha</th>
+                                <th th:text="#{cita.afectadas.horaActual}">Hora actual</th>
+                                <th th:text="#{cita.afectadas.reagendar}">Reagendar</th>
+                                <th th:text="#{cita.afectadas.cancelar}">Cancelar</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -44,25 +44,27 @@
                                                    title="Formato 24 horas, ej: 08:00 o 18:30">
                                         </div>
                                         <div class="col-auto">
-                                            <button type="submit" class="btn btn-sm btn-primary">Reagendar</button>
+                                            <button type="submit" class="btn btn-sm btn-primary" th:text="#{cita.afectadas.reagendar}">Reagendar</button>
                                         </div>
                                     </form>
                                 </td>
                                 <td>
                                     <form th:action="@{/barbero/horarios/afectadas/cancelar}" method="post">
                                         <input type="hidden" name="citaId" th:value="${c.id}">
-                                        <button type="submit" class="btn btn-sm btn-danger">Cancelar</button>
+                                        <button type="submit" class="btn btn-sm btn-danger" th:text="#{cita.afectadas.cancelar}">Cancelar</button>
                                     </form>
                                 </td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
-                <a th:href="@{/barbero/horarios}" class="btn btn-outline-secondary">Volver</a>
+                <a th:href="@{/barbero/horarios}" class="btn btn-outline-secondary" th:text="#{common.volver}">Volver</a>
             </div>
         </div>
 
-        <script>
+        <script th:inline="javascript">
+            const TEXTO_HORA_INVALIDA = [[#{cita.horaInvalida}]];
+
             function esHoraValida(texto) {
                 return /^([01]?[0-9]|2[0-3]):[0-5][0-9]$/.test(texto);
             }
@@ -94,7 +96,7 @@
                         input.classList.add('is-invalid');
                         input.focus();
                         e.preventDefault();
-                        alert('Ingrese una hora valida en formato 24 horas (ej: 08:00, 18:30).');
+                        alert(TEXTO_HORA_INVALIDA);
                     }
                 });
             });

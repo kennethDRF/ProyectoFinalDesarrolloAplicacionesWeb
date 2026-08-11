@@ -1,15 +1,15 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout/base :: base('Gestion de citas', ~{::main})}">
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout/base :: base(#{titulo.gestionCitas}, ~{::main})}">
 <head>
     <title>Citas</title>
 </head>
 <body>
     <main>
         <div class="d-flex justify-content-between align-items-center mb-4">
-            <h1>Gestion de citas</h1>
+            <h1 th:text="#{titulo.gestionCitas}">Gestion de citas</h1>
             <div>
-                <a th:href="@{/barbero/citas/nueva}" class="btn btn-success me-2">Nueva cita</a>
-                <a th:href="@{/barbero/servicios}" class="btn btn-primary">Servicios</a>
+                <a th:href="@{/barbero/citas/nueva}" class="btn btn-success me-2" th:text="#{common.nuevaCita}">Nueva cita</a>
+                <a th:href="@{/barbero/servicios}" class="btn btn-primary" th:text="#{nav.servicios}">Servicios</a>
             </div>
         </div>
 
@@ -17,7 +17,7 @@
             <div class="col-md-4">
                 <div class="card text-white bg-primary">
                     <div class="card-body">
-                        <h5 class="card-title">Citas pendientes</h5>
+                        <h5 class="card-title" th:text="#{barbero.dashboard.citasPendientes}">Citas pendientes</h5>
                         <p class="card-text display-6" th:text="${totalPendientes}">0</p>
                     </div>
                 </div>
@@ -25,7 +25,7 @@
             <div class="col-md-4">
                 <div class="card text-white bg-success">
                     <div class="card-body">
-                        <h5 class="card-title">Citas confirmadas</h5>
+                        <h5 class="card-title" th:text="#{barbero.dashboard.citasConfirmadas}">Citas confirmadas</h5>
                         <p class="card-text display-6" th:text="${totalConfirmadas}">0</p>
                     </div>
                 </div>
@@ -33,7 +33,7 @@
             <div class="col-md-4">
                 <div class="card text-white bg-warning">
                     <div class="card-body">
-                        <h5 class="card-title">Solicitudes pendientes</h5>
+                        <h5 class="card-title" th:text="#{barbero.dashboard.solicitudesPendientes}">Solicitudes pendientes</h5>
                         <p class="card-text display-6" th:text="${solicitudesPendientes.size()}">0</p>
                     </div>
                 </div>
@@ -42,18 +42,18 @@
 
         <div class="card shadow">
             <div class="card-body">
-                <h5 class="card-title mb-3">Mis citas</h5>
+                <h5 class="card-title mb-3" th:text="#{barbero.dashboard.misCitas}">Mis citas</h5>
                 <div class="table-responsive">
                     <table class="table table-hover">
                         <thead>
                             <tr>
-                                <th>Fecha</th>
-                                <th>Hora</th>
-                                <th>Cliente</th>
-                                <th>Servicios</th>
-                                <th>Monto total</th>
-                                <th>Estado</th>
-                                <th>Acciones</th>
+                                <th th:text="#{common.fecha}">Fecha</th>
+                                <th th:text="#{common.hora}">Hora</th>
+                                <th th:text="#{common.cliente}">Cliente</th>
+                                <th th:text="#{common.servicios}">Servicios</th>
+                                <th th:text="#{common.montoTotal}">Monto total</th>
+                                <th th:text="#{common.estado}">Estado</th>
+                                <th th:text="#{common.acciones}">Acciones</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -66,25 +66,31 @@
                                 </td>
                                 <td th:text="${'$' + c.montoTotal}"></td>
                                 <td>
-                                    <span class="badge" th:classappend="'estado-' + ${c.estado}" th:text="${c.estado}"></span>
-                                    <span class="badge bg-warning" th:if="${c.vencida}">Vencida</span>
+                                    <span class="badge" th:classappend="'estado-' + ${c.estado}" th:switch="${c.estado}">
+                                        <span th:case="'PENDIENTE'" th:text="#{estado.PENDIENTE}">Pendiente</span>
+                                        <span th:case="'CONFIRMADA'" th:text="#{estado.CONFIRMADA}">Confirmada</span>
+                                        <span th:case="'COMPLETADA'" th:text="#{estado.COMPLETADA}">Completada</span>
+                                        <span th:case="'CANCELADA'" th:text="#{estado.CANCELADA}">Cancelada</span>
+                                        <span th:case="'RECHAZADA'" th:text="#{estado.RECHAZADA}">Rechazada</span>
+                                    </span>
+                                    <span class="badge bg-warning" th:if="${c.vencida}" th:text="#{common.vencida}">Vencida</span>
                                 </td>
                                 <td>
                                     <div class="btn-group btn-group-sm">
-                                        <a th:if="${c.estado.name() != 'CANCELADA' && c.estado.name() != 'RECHAZADA' && c.estado.name() != 'COMPLETADA'}" th:href="@{/barbero/citas/{id}/editar(id=${c.id})}" class="btn btn-warning" title="Editar"><i class="bi bi-pencil"></i></a>
+                                        <a th:if="${c.estado.name() != 'CANCELADA' && c.estado.name() != 'RECHAZADA' && c.estado.name() != 'COMPLETADA'}" th:href="@{/barbero/citas/{id}/editar(id=${c.id})}" class="btn btn-warning" th:title="#{common.editar}"><i class="bi bi-pencil"></i></a>
                                         <form th:if="${c.estado.name() == 'PENDIENTE'}" th:action="@{/barbero/citas/{id}/aprobar-adelanto(id=${c.id})}" method="post" class="d-inline">
-                                            <button type="submit" class="btn btn-success" title="Aprobar adelanto"><i class="bi bi-check"></i></button>
+                                            <button type="submit" class="btn btn-success" th:title="#{cita.aprobarAdelanto}"><i class="bi bi-check"></i></button>
                                         </form>
                                         <form th:if="${c.estado.name() == 'PENDIENTE'}" th:action="@{/barbero/citas/{id}/rechazar(id=${c.id})}" method="post" class="d-inline">
                                             <input type="hidden" name="motivo" value="Falta de adelanto o comprobante incorrecto">
-                                            <button type="submit" class="btn btn-danger" title="Rechazar"><i class="bi bi-x"></i></button>
+                                            <button type="submit" class="btn btn-danger" th:title="#{cita.rechazar}"><i class="bi bi-x"></i></button>
                                         </form>
                                         <form th:if="${c.estado.name() == 'CONFIRMADA' || c.estado.name() == 'PENDIENTE'}" th:action="@{/barbero/citas/{id}/completar(id=${c.id})}" method="post" class="d-inline">
-                                            <button type="submit" class="btn btn-primary" title="Completar"><i class="bi bi-check-circle"></i></button>
+                                            <button type="submit" class="btn btn-primary" th:title="#{cita.completar}"><i class="bi bi-check-circle"></i></button>
                                         </form>
                                         <form th:if="${c.estado.name() != 'CANCELADA' && c.estado.name() != 'RECHAZADA' && c.estado.name() != 'COMPLETADA'}" th:action="@{/barbero/citas/{id}/cancelar(id=${c.id})}" method="post" class="d-inline">
                                             <input type="hidden" name="motivo" value="Cancelada por el barbero">
-                                            <button type="submit" class="btn btn-outline-danger" title="Cancelar" onclick="return confirm('Esta seguro de cancelar esta cita?')"><i class="bi bi-trash"></i></button>
+                                            <button type="submit" class="btn btn-outline-danger" th:title="#{cita.cancelar}" onclick="return confirm(TEXTO_CONFIRMAR_CANCELAR)"><i class="bi bi-trash"></i></button>
                                         </form>
                                     </div>
                                 </td>
@@ -94,6 +100,9 @@
                 </div>
             </div>
         </div>
+        <script th:inline="javascript">
+            const TEXTO_CONFIRMAR_CANCELAR = [[#{confirm.cancelarCita}]];
+        </script>
     </main>
 </body>
 </html>

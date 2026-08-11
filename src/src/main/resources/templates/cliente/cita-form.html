@@ -1,20 +1,20 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout/base :: base('Nueva cita', ~{::main})}">
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout/base :: base(#{titulo.nuevaCita}, ~{::main})}">
 <head>
     <title>Nueva cita</title>
 </head>
 <body>
     <main>
-        <h1 class="mb-4">Nueva cita</h1>
+        <h1 class="mb-4" th:text="#{titulo.nuevaCita}">Nueva cita</h1>
 
         <div class="alert alert-warning" th:if="${barberos == null or barberos.isEmpty()}">
             <i class="bi bi-exclamation-triangle"></i>
-            No hay barberos disponibles en esta barberia. No se pueden agendar citas por el momento.
+            <span th:text="#{cita.sinBarberos}">No hay barberos disponibles en esta barberia.</span>
         </div>
 
         <div class="alert alert-warning" th:if="${servicios == null or servicios.isEmpty()}">
             <i class="bi bi-exclamation-triangle"></i>
-            No hay servicios disponibles en esta barberia. No se pueden agendar citas por el momento.
+            <span th:text="#{cita.sinServicios}">No hay servicios disponibles en esta barberia.</span>
         </div>
 
         <div class="card shadow" th:if="${barberos != null and !barberos.isEmpty() and servicios != null and !servicios.isEmpty()}">
@@ -24,30 +24,30 @@
                     <input type="hidden" name="barberiaId" th:value="${barberiaId}">
 
                     <div class="mb-3">
-                        <label class="form-label">Barbero</label>
+                        <label class="form-label" th:text="#{common.barbero}">Barbero</label>
                         <select name="barberoId" id="barberoId" class="form-select" required>
-                            <option value="">Seleccione un barbero</option>
+                            <option value="" th:text="#{cita.seleccioneBarbero}">Seleccione un barbero</option>
                             <option th:each="b : ${barberos}" th:value="${b.id}" th:text="${b.nombreCompleto}"></option>
                         </select>
                     </div>
 
                     <div class="mb-3">
                         <button type="button" id="btnVerHorario" class="btn btn-outline-info">
-                            <i class="bi bi-clock"></i> Ver horario
+                            <i class="bi bi-clock"></i><span th:text="#{cita.verHorario}"> Ver horario</span>
                         </button>
                     </div>
 
                     <div class="collapse mb-3" id="panelHorario">
                         <div class="card card-body">
-                            <h6>Horario del barbero</h6>
+                            <h6 th:text="#{cita.horarioBarbero}">Horario del barbero</h6>
                             <div id="contenidoHorario">
-                                <p class="text-muted">Seleccione un barbero y presione "Ver horario".</p>
+                                <p class="text-muted" th:text="#{cita.seleccioneBarberoVerHorario}">Seleccione un barbero y presione Ver horario.</p>
                             </div>
                         </div>
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label">Servicios</label>
+                        <label class="form-label" th:text="#{common.servicios}">Servicios</label>
                         <div class="row">
                             <div class="col-md-6 mb-2" th:each="s : ${servicios}">
                                 <div class="form-check">
@@ -58,52 +58,52 @@
                                 </div>
                             </div>
                         </div>
-                        <small class="text-muted">Seleccione al menos un servicio. El sistema validara que el barbero lo ofrezca.</small>
+                        <small class="text-muted" th:text="#{cita.seleccioneAlMenosUno}">Seleccione al menos un servicio.</small>
                     </div>
 
                     <div class="card mb-3" id="totalesServicios" style="display: none;">
                         <div class="card-body">
-                            <h6 class="card-title">Resumen</h6>
+                            <h6 class="card-title" th:text="#{cita.resumen}">Resumen</h6>
                             <div class="row">
                                 <div class="col-md-6">
-                                    <strong>Total servicios:</strong> <span id="totalServicios">$0</span>
+                                    <strong th:text="#{cita.totalServicios}">Total servicios:</strong> <span id="totalServicios">$0</span>
                                 </div>
                                 <div class="col-md-6">
-                                    <strong>Total adelanto:</strong> <span id="totalAdelanto">$0</span>
+                                    <strong th:text="#{cita.totalAdelanto}">Total adelanto:</strong> <span id="totalAdelanto">$0</span>
                                 </div>
                             </div>
                         </div>
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label">Fecha</label>
+                        <label class="form-label" th:text="#{common.fecha}">Fecha</label>
                         <input type="date" name="fecha" class="form-control" required>
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label">Hora de inicio</label>
+                        <label class="form-label" th:text="#{cita.horaInicio}">Hora de inicio</label>
                         <input type="text" name="horaInicio" id="horaInicio" class="form-control"
                                placeholder="HH:mm" maxlength="5" required
                                title="Formato 24 horas, ej: 08:00 o 18:30">
-                        <small class="text-muted">Ingrese la hora en formato 24 horas (ej: 08:00, 18:30).</small>
+                        <small class="text-muted" th:text="#{common.formatoHora}">Ingrese la hora en formato 24 horas.</small>
                     </div>
 
                     <div class="mb-3" id="seccionAdelanto" style="display: none;">
                         <div class="form-check">
                             <input class="form-check-input" type="checkbox" name="adelantoPagado" id="adelantoPagado" value="true">
-                            <label class="form-check-label" for="adelantoPagado">
+                            <label class="form-check-label" for="adelantoPagado" th:text="#{cita.hePagadoAdelanto}">
                                 He pagado el adelanto
                             </label>
                         </div>
                         <div class="mt-2">
-                            <label class="form-label">Numero de comprobante</label>
+                            <label class="form-label" th:text="#{cita.numeroComprobante}">Numero de comprobante</label>
                             <input type="text" name="comprobanteAdelanto" class="form-control">
                         </div>
                     </div>
 
                     <div class="d-grid gap-2">
-                        <button type="submit" class="btn btn-primary">Guardar</button>
-                        <a th:href="@{/cliente/dashboard}" class="btn btn-outline-secondary">Cancelar</a>
+                        <button type="submit" class="btn btn-primary" th:text="#{common.guardar}">Guardar</button>
+                        <a th:href="@{/cliente/dashboard}" class="btn btn-outline-secondary" th:text="#{common.cancelar}">Cancelar</a>
                     </div>
                 </form>
             </div>
@@ -111,7 +111,7 @@
 
         <div class="toast align-items-center text-bg-warning border-0" role="alert" aria-live="assertive" aria-atomic="true" id="toastBarbero">
             <div class="d-flex">
-                <div class="toast-body">Seleccione un barbero primero.</div>
+                <div class="toast-body" th:text="#{cita.toastBarbero}">Seleccione un barbero primero.</div>
                 <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
             </div>
         </div>
@@ -119,10 +119,22 @@
         <script type="application/json" id="horariosTodosJson" th:utext="${horariosTodosJson}"></script>
         <script type="application/json" id="excepcionesTodosJson" th:utext="${excepcionesTodosJson}"></script>
         <script type="application/json" id="serviciosJson" th:utext="${serviciosJson}"></script>
-        <script>
+        <script th:inline="javascript">
             const horariosTodos = JSON.parse(document.getElementById('horariosTodosJson').textContent);
             const excepcionesTodos = JSON.parse(document.getElementById('excepcionesTodosJson').textContent);
             const serviciosData = JSON.parse(document.getElementById('serviciosJson').textContent);
+
+            const TEXTO_DIA = [[#{common.dia}]];
+            const TEXTO_HORARIO = [[#{cita.horario}]];
+            const TEXTO_LIBRE = [[#{horario.libre}]];
+            const TEXTO_NO_TRABAJA = [[#{horario.noTrabaja}]];
+            const TEXTO_NO_EXCEPCIONES = [[#{cita.noExcepciones}]];
+            const TEXTO_EXCEPCIONES = [[#{horario.excepciones}]];
+            const TEXTO_FECHA = [[#{common.fecha}]];
+            const TEXTO_TIPO = [[#{common.tipo}]];
+            const TEXTO_MOTIVO = [[#{horario.motivo}]];
+            const TEXTO_HORARIO_SEMANAL = [[#{horario.semanal}]];
+            const TEXTO_HORA_INVALIDA = [[#{cita.horaInvalida}]];
 
             function formatearDinero(valor) {
                 return '$' + parseFloat(valor).toLocaleString('es-CR', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
@@ -164,13 +176,13 @@
             });
 
             const nombresDias = {
-                'MONDAY': 'Lunes',
-                'TUESDAY': 'Martes',
-                'WEDNESDAY': 'Miercoles',
-                'THURSDAY': 'Jueves',
-                'FRIDAY': 'Viernes',
-                'SATURDAY': 'Sabado',
-                'SUNDAY': 'Domingo'
+                'MONDAY': [[#{dia.MONDAY}]],
+                'TUESDAY': [[#{dia.TUESDAY}]],
+                'WEDNESDAY': [[#{dia.WEDNESDAY}]],
+                'THURSDAY': [[#{dia.THURSDAY}]],
+                'FRIDAY': [[#{dia.FRIDAY}]],
+                'SATURDAY': [[#{dia.SATURDAY}]],
+                'SUNDAY': [[#{dia.SUNDAY}]]
             };
 
             const ordenDias = ['MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY'];
@@ -184,12 +196,12 @@
             }
 
             function construirTablaSemanal(horarios) {
-                let html = '<table class="table table-sm"><thead><tr><th>Dia</th><th>Horario</th></tr></thead><tbody>';
+                let html = '<table class="table table-sm"><thead><tr><th>' + TEXTO_DIA + '</th><th>' + TEXTO_HORARIO + '</th></tr></thead><tbody>';
 
                 ordenDias.forEach(diaIngles => {
                     const h = horarios.find(x => x.dia === diaIngles);
                     const nombre = nombresDias[diaIngles];
-                    const horario = h && !h.libre ? h.inicio + ' - ' + h.fin : 'Libre';
+                    const horario = h && !h.libre ? h.inicio + ' - ' + h.fin : TEXTO_LIBRE;
                     html += '<tr><td>' + nombre + '</td><td>' + horario + '</td></tr>';
                 });
 
@@ -199,14 +211,14 @@
 
             function construirTablaExcepciones(excepciones) {
                 if (excepciones.length === 0) {
-                    return '<p class="text-muted">No hay excepciones programadas.</p>';
+                    return '<p class="text-muted">' + TEXTO_NO_EXCEPCIONES + '</p>';
                 }
 
-                let html = '<h6 class="mt-3">Excepciones</h6>';
-                html += '<table class="table table-sm"><thead><tr><th>Fecha</th><th>Tipo</th><th>Horario</th><th>Motivo</th></tr></thead><tbody>';
+                let html = '<h6 class="mt-3">' + TEXTO_EXCEPCIONES + '</h6>';
+                html += '<table class="table table-sm"><thead><tr><th>' + TEXTO_FECHA + '</th><th>' + TEXTO_TIPO + '</th><th>' + TEXTO_HORARIO + '</th><th>' + TEXTO_MOTIVO + '</th></tr></thead><tbody>';
 
                 excepciones.forEach(e => {
-                    const horario = e.tipo === 'NO_TRABAJA' ? 'No trabaja' : e.inicio + ' - ' + e.fin;
+                    const horario = e.tipo === 'NO_TRABAJA' ? TEXTO_NO_TRABAJA : e.inicio + ' - ' + e.fin;
                     html += '<tr><td>' + e.fecha + '</td><td>' + e.tipo + '</td><td>' + horario + '</td><td>' + e.motivo + '</td></tr>';
                 });
 
@@ -226,7 +238,7 @@
                 const horarios = obtenerHorariosPorBarbero(barberoId);
                 const excepciones = obtenerExcepcionesPorBarbero(barberoId);
 
-                let html = '<h6>Horario semanal</h6>';
+                let html = '<h6>' + TEXTO_HORARIO_SEMANAL + '</h6>';
                 html += construirTablaSemanal(horarios);
                 html += construirTablaExcepciones(excepciones);
 
@@ -267,7 +279,7 @@
                     inputHora.classList.add('is-invalid');
                     inputHora.focus();
                     e.preventDefault();
-                    alert('Ingrese una hora valida en formato 24 horas (ej: 08:00, 18:30).');
+                    alert(TEXTO_HORA_INVALIDA);
                 }
             });
         </script>
