@@ -1,9 +1,12 @@
 package com.ufide.barbex.controller;
 
 import com.ufide.barbex.entity.*;
+import com.ufide.barbex.security.CustomUserDetails;
 import com.ufide.barbex.service.*;
-import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -15,11 +18,16 @@ import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 @Controller
 @RequestMapping("/barbero")
+@PreAuthorize("hasRole('BARBERO')")
 public class BarberoController {
+
+    @Autowired
+    private MessageSource messageSource;
 
     @Autowired
     private UsuarioService usuarioService;
@@ -36,17 +44,13 @@ public class BarberoController {
     @Autowired
     private SolicitudCambioCitaService solicitudService;
 
-    private Usuario getBarberoSession(HttpSession session) {
-        Usuario usuario = usuarioService.getUsuarioSession(session);
-        if (usuario == null || !usuario.esBarbero()) {
-            throw new RuntimeException("Acceso denegado");
-        }
-        return usuario;
+    private Usuario getBarbero(CustomUserDetails userDetails) {
+        return userDetails.getUsuario();
     }
 
     @GetMapping("/dashboard")
-    public String dashboard(HttpSession session, Model model) {
-        Usuario barbero = getBarberoSession(session);
+    public String dashboard(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
+        Usuario barbero = getBarbero(userDetails);
         List<Cita> citas = citaService.listarPorBarbero(barbero.getId());
 
         long totalPendientes = 0;
@@ -67,24 +71,24 @@ public class BarberoController {
     }
 
     @PostMapping("/citas/{id}/completar")
-    public String completarCita(@PathVariable Long id, RedirectAttributes ra) {
+    public String completarCita(@PathVariable Long id, RedirectAttributes ra, Locale locale) {
         citaService.marcarCompletada(id);
-        ra.addFlashAttribute("ok", "Cita marcada como completada");
+        ra.addFlashAttribute("ok", messageSource.getMessage("mensaje.cita.completada", null, locale));
         return "redirect:/barbero/dashboard";
     }
 
     @PostMapping("/citas/{id}/cancelar")
-    public String cancelarCita(@PathVariable Long id, @RequestParam String motivo, RedirectAttributes ra) {
+    public String cancelarCita(@PathVariable Long id, @RequestParam String motivo, RedirectAttributes ra, Locale locale) {
         citaService.cancelarDirectamente(id, motivo);
-        ra.addFlashAttribute("ok", "Cita cancelada");
+        ra.addFlashAttribute("ok", messageSource.getMessage("mensaje.cita.cancelada", null, locale));
         return "redirect:/barbero/dashboard";
     }
 
     @PostMapping("/citas/{id}/aprobar-adelanto")
-    public String aprobarAdelanto(@PathVariable Long id, RedirectAttributes ra) {
+    public String aprobarAdelanto(@PathVariable Long id, RedirectAttributes ra, Locale locale) {
         try {
             citaService.aprobarAdelanto(id);
-            ra.addFlashAttribute("ok", "Adelanto aprobado");
+            ra.addFlashAttribute("ok", messageSource.getMessage("mensaje.adelanto.aprobado", null, locale));
         } catch (Exception e) {
             ra.addFlashAttribute("error", e.getMessage());
         }
@@ -92,15 +96,15 @@ public class BarberoController {
     }
 
     @PostMapping("/citas/{id}/rechazar")
-    public String rechazarCita(@PathVariable Long id, @RequestParam String motivo, RedirectAttributes ra) {
+    public String rechazarCita(@PathVariable Long id, @RequestParam String motivo, RedirectAttributes ra, Locale locale) {
         citaService.rechazarCita(id, motivo);
-        ra.addFlashAttribute("ok", "Cita rechazada");
+        ra.addFlashAttribute("ok", messageSource.getMessage("mensaje.cita.rechazada", null, locale));
         return "redirect:/barbero/dashboard";
     }
 
     @GetMapping("/citas/{id}/editar")
-    public String editarCita(@PathVariable Long id, HttpSession session, Model model) {
-        Usuario barbero = getBarberoSession(session);
+    public String editarCita(@PathVariable Long id, @AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
+        Usuario barbero = getBarbero(userDetails);
         Cita cita = citaService.findById(id).orElseThrow();
         if (!cita.getBarbero().getId().equals(barbero.getId())) {
             return "redirect:/barbero/dashboard";
@@ -113,16 +117,17 @@ public class BarberoController {
     public String actualizarCita(@PathVariable Long id,
                                  @RequestParam LocalDate nuevaFecha,
                                  @RequestParam LocalTime nuevaHoraInicio,
-                                 HttpSession session,
-                                 RedirectAttributes ra) {
-        Usuario barbero = getBarberoSession(session);
+                                 @AuthenticationPrincipal CustomUserDetails userDetails,
+                                 RedirectAttributes ra,
+                                 Locale locale) {
+        Usuario barbero = getBarbero(userDetails);
         Cita cita = citaService.findById(id).orElseThrow();
         if (!cita.getBarbero().getId().equals(barbero.getId())) {
             return "redirect:/barbero/dashboard";
         }
         try {
             citaService.editarCita(id, nuevaFecha, nuevaHoraInicio);
-            ra.addFlashAttribute("ok", "Cita actualizada correctamente");
+            ra.addFlashAttribute("ok", messageSource.getMessage("mensaje.cita.actualizada", null, locale));
         } catch (Exception e) {
             ra.addFlashAttribute("error", e.getMessage());
         }
@@ -130,27 +135,27 @@ public class BarberoController {
     }
 
     @GetMapping("/servicios")
-    public String servicios(HttpSession session, Model model) {
-        Usuario barbero = getBarberoSession(session);
+    public String servicios(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
+        Usuario barbero = getBarbero(userDetails);
         model.addAttribute("servicios", servicioService.listarPorBarberia(barbero.getBarberia().getId()));
         model.addAttribute("barbero", barbero);
         return "barbero/servicios";
     }
 
     @GetMapping("/servicios/nuevo")
-    public String nuevoServicio(HttpSession session, Model model) {
+    public String nuevoServicio(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
         Servicio servicio = new Servicio();
-        servicio.setBarberia(getBarberoSession(session).getBarberia());
+        servicio.setBarberia(getBarbero(userDetails).getBarberia());
         model.addAttribute("servicio", servicio);
         return "barbero/servicio-form";
     }
 
     @PostMapping("/servicios/guardar")
-    public String guardarServicio(@ModelAttribute Servicio servicio, HttpSession session, Model model, RedirectAttributes ra) {
-        servicio.setBarberia(getBarberoSession(session).getBarberia());
+    public String guardarServicio(@ModelAttribute Servicio servicio, @AuthenticationPrincipal CustomUserDetails userDetails, Model model, RedirectAttributes ra, Locale locale) {
+        servicio.setBarberia(getBarbero(userDetails).getBarberia());
         try {
             servicioService.guardar(servicio);
-            ra.addFlashAttribute("ok", "Servicio guardado");
+            ra.addFlashAttribute("ok", messageSource.getMessage("mensaje.servicio.guardado", null, locale));
             return "redirect:/barbero/servicios";
         } catch (Exception e) {
             model.addAttribute("error", e.getMessage());
@@ -160,11 +165,11 @@ public class BarberoController {
     }
 
     @PostMapping("/servicios/{id}/eliminar")
-    public String eliminarServicio(@PathVariable Long id, HttpSession session, RedirectAttributes ra) {
-        getBarberoSession(session);
+    public String eliminarServicio(@PathVariable Long id, @AuthenticationPrincipal CustomUserDetails userDetails, RedirectAttributes ra, Locale locale) {
+        getBarbero(userDetails);
         try {
             servicioService.eliminarDefinitivo(id);
-            ra.addFlashAttribute("ok", "Servicio eliminado definitivamente");
+            ra.addFlashAttribute("ok", messageSource.getMessage("mensaje.servicio.eliminado", null, locale));
         } catch (Exception e) {
             ra.addFlashAttribute("error", e.getMessage());
         }
@@ -172,8 +177,8 @@ public class BarberoController {
     }
 
     @GetMapping("/horarios")
-    public String horarios(HttpSession session, Model model) {
-        Usuario barbero = getBarberoSession(session);
+    public String horarios(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
+        Usuario barbero = getBarbero(userDetails);
         model.addAttribute("horarios", horarioService.listarPorBarbero(barbero.getId()));
         model.addAttribute("excepciones", horarioService.listarExcepcionesPorBarbero(barbero.getId()));
         return "barbero/horarios";
@@ -184,9 +189,10 @@ public class BarberoController {
                                   @RequestParam("libre") List<Boolean> libres,
                                   @RequestParam("horaInicio") List<String> horasInicio,
                                   @RequestParam("horaFin") List<String> horasFin,
-                                  HttpSession session,
-                                  RedirectAttributes ra) {
-        Usuario barbero = getBarberoSession(session);
+                                  @AuthenticationPrincipal CustomUserDetails userDetails,
+                                  RedirectAttributes ra,
+                                  Locale locale) {
+        Usuario barbero = getBarbero(userDetails);
 
         List<HorarioGeneral> horarios = new ArrayList<>();
         for (int i = 0; i < diasSemana.size(); i++) {
@@ -201,13 +207,13 @@ public class BarberoController {
         }
 
         horarioService.guardarHorariosSemanales(barbero.getId(), horarios);
-        ra.addFlashAttribute("ok", "Horario semanal guardado");
+        ra.addFlashAttribute("ok", messageSource.getMessage("mensaje.horario.guardado", null, locale));
         return "redirect:/barbero/horarios";
     }
 
     @PostMapping("/excepciones/guardar")
-    public String guardarExcepcion(@ModelAttribute ExcepcionHorario excepcion, HttpSession session, RedirectAttributes ra) {
-        Usuario barbero = getBarberoSession(session);
+    public String guardarExcepcion(@ModelAttribute ExcepcionHorario excepcion, @AuthenticationPrincipal CustomUserDetails userDetails, RedirectAttributes ra, Locale locale) {
+        Usuario barbero = getBarbero(userDetails);
         excepcion.setBarbero(barbero);
         try {
             List<Cita> afectadas = horarioService.obtenerCitasAfectadasPorExcepcion(barbero.getId(), excepcion);
@@ -217,7 +223,7 @@ public class BarberoController {
                 return "redirect:/barbero/horarios/afectadas";
             }
             horarioService.guardarExcepcion(excepcion);
-            ra.addFlashAttribute("ok", "Excepcion guardada");
+            ra.addFlashAttribute("ok", messageSource.getMessage("mensaje.excepcion.guardada", null, locale));
         } catch (Exception e) {
             ra.addFlashAttribute("error", e.getMessage());
         }
@@ -236,10 +242,11 @@ public class BarberoController {
     public String reagendarCitaAfectada(@RequestParam Long citaId,
                                         @RequestParam LocalDate nuevaFecha,
                                         @RequestParam LocalTime nuevaHoraInicio,
-                                        RedirectAttributes ra) {
+                                        RedirectAttributes ra,
+                                        Locale locale) {
         try {
             citaService.reagendarCita(citaId, nuevaFecha, nuevaHoraInicio, "Modificacion de horario");
-            ra.addFlashAttribute("ok", "Cita reagendada");
+            ra.addFlashAttribute("ok", messageSource.getMessage("mensaje.cita.reagendada", null, locale));
         } catch (Exception e) {
             ra.addFlashAttribute("error", e.getMessage());
         }
@@ -247,15 +254,15 @@ public class BarberoController {
     }
 
     @PostMapping("/horarios/afectadas/cancelar")
-    public String cancelarCitaAfectada(@RequestParam Long citaId, RedirectAttributes ra) {
+    public String cancelarCitaAfectada(@RequestParam Long citaId, RedirectAttributes ra, Locale locale) {
         citaService.cancelarDirectamente(citaId, "Cancelada por modificacion de horario");
-        ra.addFlashAttribute("ok", "Cita cancelada por modificacion de horario");
+        ra.addFlashAttribute("ok", messageSource.getMessage("mensaje.cita.canceladaHorario", null, locale));
         return "redirect:/barbero/horarios";
     }
 
     @GetMapping("/citas/nueva")
-    public String nuevaCitaBarbero(HttpSession session, Model model) {
-        Usuario barbero = getBarberoSession(session);
+    public String nuevaCitaBarbero(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
+        Usuario barbero = getBarbero(userDetails);
         List<HorarioGeneral> horarios = horarioService.listarPorBarbero(barbero.getId());
         List<ExcepcionHorario> excepciones = horarioService.listarExcepcionesFuturasPorBarbero(barbero.getId());
 
@@ -332,10 +339,11 @@ public class BarberoController {
                                      @RequestParam(required = false) List<Long> servicios,
                                      @RequestParam(required = false, defaultValue = "false") boolean adelantoPagado,
                                      @RequestParam(required = false) String comprobanteAdelanto,
-                                     RedirectAttributes ra) {
+                                     RedirectAttributes ra,
+                                     Locale locale) {
         try {
             citaService.crearCita(barberoId, clienteId, barberiaId, fecha, horaInicio, servicios, adelantoPagado, comprobanteAdelanto);
-            ra.addFlashAttribute("ok", "Cita creada correctamente");
+            ra.addFlashAttribute("ok", messageSource.getMessage("mensaje.cita.creada", null, locale));
         } catch (Exception e) {
             ra.addFlashAttribute("error", e.getMessage());
         }
@@ -343,17 +351,17 @@ public class BarberoController {
     }
 
     @GetMapping("/solicitudes")
-    public String solicitudes(HttpSession session, Model model) {
-        Usuario barbero = getBarberoSession(session);
+    public String solicitudes(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
+        Usuario barbero = getBarbero(userDetails);
         model.addAttribute("solicitudes", solicitudService.listarPendientesPorBarbero(barbero.getId()));
         return "barbero/solicitudes";
     }
 
     @PostMapping("/solicitudes/{id}/aprobar")
-    public String aprobarSolicitud(@PathVariable Long id, RedirectAttributes ra) {
+    public String aprobarSolicitud(@PathVariable Long id, RedirectAttributes ra, Locale locale) {
         try {
             solicitudService.aprobarSolicitud(id);
-            ra.addFlashAttribute("ok", "Solicitud aprobada");
+            ra.addFlashAttribute("ok", messageSource.getMessage("mensaje.solicitud.aprobada", null, locale));
         } catch (Exception e) {
             ra.addFlashAttribute("error", e.getMessage());
         }
@@ -361,9 +369,9 @@ public class BarberoController {
     }
 
     @PostMapping("/solicitudes/{id}/rechazar")
-    public String rechazarSolicitud(@PathVariable Long id, @RequestParam String motivo, RedirectAttributes ra) {
+    public String rechazarSolicitud(@PathVariable Long id, @RequestParam String motivo, RedirectAttributes ra, Locale locale) {
         solicitudService.rechazarSolicitud(id, motivo);
-        ra.addFlashAttribute("ok", "Solicitud rechazada");
+        ra.addFlashAttribute("ok", messageSource.getMessage("mensaje.solicitud.rechazada", null, locale));
         return "redirect:/barbero/solicitudes";
     }
 }

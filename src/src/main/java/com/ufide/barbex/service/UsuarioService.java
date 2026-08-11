@@ -2,9 +2,9 @@ package com.ufide.barbex.service;
 
 import com.ufide.barbex.entity.*;
 import com.ufide.barbex.repository.*;
-import jakarta.servlet.http.HttpSession;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -13,8 +13,6 @@ import java.util.Optional;
 
 @Service
 public class UsuarioService {
-
-    public static final String USUARIO_SESSION = "usuario";
 
     @Autowired
     private UsuarioRepository usuarioRepository;
@@ -31,33 +29,15 @@ public class UsuarioService {
     @Autowired
     private HorarioService horarioService;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     public Optional<Usuario> findByEmail(String email) {
         return usuarioRepository.findByEmail(email);
     }
 
     public Optional<Usuario> findById(Long id) {
         return usuarioRepository.findById(id);
-    }
-
-    public Usuario getUsuarioSession(HttpSession session) {
-        return (Usuario) session.getAttribute(USUARIO_SESSION);
-    }
-
-    public boolean isLoggedIn(HttpSession session) {
-        return getUsuarioSession(session) != null;
-    }
-
-    public void login(HttpSession session, Usuario usuario) {
-        session.setAttribute(USUARIO_SESSION, usuario);
-    }
-
-    public void logout(HttpSession session) {
-        session.invalidate();
-    }
-
-    public boolean validarLogin(String email, String password) {
-        Optional<Usuario> opt = usuarioRepository.findByEmail(email);
-        return opt.isPresent() && opt.get().getPassword().equals(password);
     }
 
     @Transactional
@@ -69,6 +49,7 @@ public class UsuarioService {
 
         Barberia barberia = obtenerOCrearBarberia(nombreBarberia, direccionBarberia, telefonoBarberia, barberiaId);
 
+        usuario.setPassword(passwordEncoder.encode(usuario.getPassword()));
         usuario.setBarberia(barberia);
         usuario.setActivo(true);
         usuario = usuarioRepository.save(usuario);

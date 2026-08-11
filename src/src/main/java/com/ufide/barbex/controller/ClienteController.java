@@ -1,9 +1,12 @@
 package com.ufide.barbex.controller;
 
 import com.ufide.barbex.entity.*;
+import com.ufide.barbex.security.CustomUserDetails;
 import com.ufide.barbex.service.*;
-import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -13,10 +16,15 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 @Controller
 @RequestMapping("/cliente")
+@PreAuthorize("hasRole('CLIENTE')")
 public class ClienteController {
+
+    @Autowired
+    private MessageSource messageSource;
 
     @Autowired
     private UsuarioService usuarioService;
@@ -33,25 +41,21 @@ public class ClienteController {
     @Autowired
     private SolicitudCambioCitaService solicitudService;
 
-    private Usuario getClienteSession(HttpSession session) {
-        Usuario usuario = usuarioService.getUsuarioSession(session);
-        if (usuario == null || !usuario.esCliente()) {
-            throw new RuntimeException("Acceso denegado");
-        }
-        return usuario;
+    private Usuario getCliente(CustomUserDetails userDetails) {
+        return userDetails.getUsuario();
     }
 
     @GetMapping("/dashboard")
-    public String dashboard(HttpSession session, Model model) {
-        Usuario cliente = getClienteSession(session);
+    public String dashboard(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
+        Usuario cliente = getCliente(userDetails);
         model.addAttribute("citas", citaService.listarPorCliente(cliente.getId()));
         model.addAttribute("solicitudes", solicitudService.listarPorCliente(cliente.getId()));
         return "cliente/dashboard";
     }
 
     @GetMapping("/citas/nueva")
-    public String nuevaCita(HttpSession session, Model model) {
-        Usuario cliente = getClienteSession(session);
+    public String nuevaCita(@AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
+        Usuario cliente = getCliente(userDetails);
         Long barberiaId = cliente.getBarberia().getId();
         List<Usuario> barberos = usuarioService.listarBarberosPorBarberia(barberiaId);
         List<Servicio> servicios = servicioService.listarActivosPorBarberia(barberiaId);
@@ -137,10 +141,11 @@ public class ClienteController {
                               @RequestParam(required = false) List<Long> servicios,
                               @RequestParam(required = false, defaultValue = "false") boolean adelantoPagado,
                               @RequestParam(required = false) String comprobanteAdelanto,
-                              RedirectAttributes ra) {
+                              RedirectAttributes ra,
+                              Locale locale) {
         try {
             citaService.crearCita(barberoId, clienteId, barberiaId, fecha, horaInicio, servicios, adelantoPagado, comprobanteAdelanto);
-            ra.addFlashAttribute("ok", "Cita agendada correctamente");
+            ra.addFlashAttribute("ok", messageSource.getMessage("mensaje.cita.agendada", null, locale));
         } catch (Exception e) {
             System.err.println("ERROR AL CREAR CITA: " + e.getMessage());
             e.printStackTrace();
@@ -151,8 +156,8 @@ public class ClienteController {
     }
 
     @GetMapping("/citas/{id}/editar")
-    public String editarCita(@PathVariable Long id, HttpSession session, Model model) {
-        Usuario cliente = getClienteSession(session);
+    public String editarCita(@PathVariable Long id, @AuthenticationPrincipal CustomUserDetails userDetails, Model model) {
+        Usuario cliente = getCliente(userDetails);
         Cita cita = citaService.findById(id).orElseThrow();
         if (!cita.getCliente().getId().equals(cliente.getId())) {
             return "redirect:/cliente/dashboard";
@@ -165,10 +170,11 @@ public class ClienteController {
     public String solicitarEdicion(@PathVariable Long id,
                                    @RequestParam LocalDate nuevaFecha,
                                    @RequestParam LocalTime nuevaHoraInicio,
-                                   RedirectAttributes ra) {
+                                   RedirectAttributes ra,
+                                   Locale locale) {
         try {
             solicitudService.solicitarEdicion(id, nuevaFecha, nuevaHoraInicio);
-            ra.addFlashAttribute("ok", "Solicitud de edicion enviada");
+            ra.addFlashAttribute("ok", messageSource.getMessage("mensaje.solicitud.edicion", null, locale));
         } catch (Exception e) {
             ra.addFlashAttribute("error", e.getMessage());
         }
@@ -176,10 +182,10 @@ public class ClienteController {
     }
 
     @PostMapping("/citas/{id}/solicitar-cancelacion")
-    public String solicitarCancelacion(@PathVariable Long id, RedirectAttributes ra) {
+    public String solicitarCancelacion(@PathVariable Long id, RedirectAttributes ra, Locale locale) {
         try {
             solicitudService.solicitarCancelacion(id);
-            ra.addFlashAttribute("ok", "Solicitud de cancelacion enviada");
+            ra.addFlashAttribute("ok", messageSource.getMessage("mensaje.solicitud.cancelacion", null, locale));
         } catch (Exception e) {
             ra.addFlashAttribute("error", e.getMessage());
         }
